@@ -1,0 +1,96 @@
+{% extends 'usuarios/base.html' %}
+{% load form_tags %}
+{% block title %}Lista de Usuários{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Lista de Usuários</h1>
+
+<!-- Formulário de filtro e busca -->
+<form method="get" class="mb-3 row g-2 align-items-center">
+    <div class="col-auto">
+        <label for="perfil" class="form-label">Filtrar por perfil:</label>
+        <select name="perfil" id="perfil" class="form-select">
+            <option value="todos" {% if perfil_filtro == "todos" %}selected{% endif %}>Todos</option>
+            <option value="administrador" {% if perfil_filtro == "administrador" %}selected{% endif %}>Administrador</option>
+            <option value="tecnico" {% if perfil_filtro == "tecnico" %}selected{% endif %}>Técnico</option>
+            <option value="medico" {% if perfil_filtro == "medico" %}selected{% endif %}>Médico</option>
+            <option value="enfermeiro" {% if perfil_filtro == "enfermeiro" %}selected{% endif %}>Enfermeiro</option>
+            <option value="recepcao" {% if perfil_filtro == "recepcao" %}selected{% endif %}>Recepção</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <label for="busca" class="form-label">Busca:</label>
+        <input type="text" name="busca" id="busca" class="form-control" value="{{ busca }}" placeholder="Username ou email">
+    </div>
+
+    <div class="col-auto mt-4">
+        <button type="submit" class="btn btn-primary">Aplicar</button>
+        <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Limpar</a>
+    </div>
+</form>
+
+<a class="btn btn-success mb-3" href="{% url 'usuario_create' %}">Novo Usuário</a>
+
+<!-- Tabela de usuários -->
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Usuário</th>
+            <th>Email</th>
+            <th>Perfil</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in page_obj %}
+        <tr class="perfil-{{ usuario.perfil }}">
+            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.email }}</td>
+            <td>{{ usuario.get_perfil_display }}</td>
+            <td>
+                <a class="btn btn-sm btn-warning" href="{% url 'usuario_update' usuario.id %}">Editar</a>
+                <a class="btn btn-sm btn-danger" href="{% url 'usuario_delete' usuario.id %}">Deletar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Nenhum usuário encontrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- Paginação centralizada -->
+<nav aria-label="Navegação de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&perfil={{ perfil_filtro }}&busca={{ busca }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}&perfil={{ perfil_filtro }}&busca={{ busca }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&perfil={{ perfil_filtro }}&busca={{ busca }}">Próxima</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+
+
+{% endblock %}
