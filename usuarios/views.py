@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth import authenticate, login
+from .models import Usuario  # <--- import do modelo
 from django.core.paginator import Paginator
-from .models import Usuario
-from .forms import UsuarioForm, LoginForm
+from .forms import UsuarioForm
+from .forms import LoginForm
 import random
 
-# ===== 2FA =====
+# Armazena temporariamente códigos 2FA (apenas para teste)
 tfa_codes = {}
 
 def login_view(request):
@@ -15,40 +16,58 @@ def login_view(request):
     if request.method == 'POST':
         token = request.POST.get('token')
 
+        # ===== Segunda etapa: validação do token 2FA =====
         if token:
             username = request.session.get('username_temp')
             password = request.session.get('password_temp')
+
             if username and tfa_codes.get(username) == token:
                 user = authenticate(request, username=username, password=password)
                 if user:
                     login(request, user)
+                    # Remove código usado e limpa sessão temporária sem gerar KeyError
                     tfa_codes.pop(username, None)
-                    request.session.pop('username_temp')
-                    request.session.pop('password_temp')
-                    # redireciona por perfil
-                    if user.perfil == 'administrador': return redirect('admin_dashboard')
-                    elif user.perfil == 'medico': return redirect('medico_dashboard')
-                    elif user.perfil == 'enfermeiro': return redirect('enfermeiro_dashboard')
-                    elif user.perfil == 'tecnico': return redirect('tecnico_dashboard')
-                    elif user.perfil == 'recepcao': return redirect('recepcao_dashboard')
+                    request.session.pop('username_temp', None)
+                    request.session.pop('password_temp', None)
+
+                    # Redireciona por perfil
+                    if user.perfil == 'administrador':
+                        return redirect('admin_dashboard')
+                    elif user.perfil == 'medico':
+                        return redirect('medico_dashboard')
+                    elif user.perfil == 'enfermeiro':
+                        return redirect('enfermeiro_dashboard')
+                    elif user.perfil == 'tecnico':
+                        return redirect('tecnico_dashboard')
+                    elif user.perfil == 'recepcao':
+                        return redirect('recepcao_dashboard')
                 else:
                     error = "Usuário ou senha inválidos."
             else:
                 error = "Código 2FA inválido."
+
+        # ===== Primeira etapa: autenticação username + senha =====
         else:
             username = request.POST.get('username')
             password = request.POST.get('password')
+
             user = authenticate(request, username=username, password=password)
             if user:
+                # Gera código 6 dígitos para 2FA
                 code = str(random.randint(100000, 999999))
                 tfa_codes[username] = code
+
+                # Salva temporariamente username e password na sessão
                 request.session['username_temp'] = username
                 request.session['password_temp'] = password
+
+                # Renderiza tela de 2FA
                 return render(request, 'usuarios/login_2fa.html', {'code': code})
             else:
                 error = "Usuário ou senha inválidos."
 
     return render(request, 'usuarios/login.html', {'form': form, 'error': error})
+
 
 # ===== DASHBOARDS =====
 def admin_dashboard(request): return render(request, 'usuarios/admin_dashboard.html')

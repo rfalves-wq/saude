@@ -1,0 +1,30 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Dashboard Enfermeiro{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Bem-vindo, Enfermeiro!</h1>
+    <p>Este é o seu painel de controle. Aqui você pode gerenciar pacientes, registrar atendimentos e acessar prontuários.</p>
+
+    <div class="mt-4 mb-5">
+        <a href="{% url 'paciente_list' %}" class="btn btn-primary btn-lg me-3 mb-2">Ver Pacientes</a>
+        <a href="{% url 'atendimento_create' %}" class="btn btn-success btn-lg me-3 mb-2">Registrar Atendimento</a>
+        <a href="{% url 'prontuario_list' %}" class="btn btn-info btn-lg me-3 mb-2">Prontuários</a>
+
+        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg">Sair</button>
+        </form>
+    </div>
+
+    <div class="mt-5 text-start">
+        <h4>Opções rápidas:</h4>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item">Visualizar lista de pacientes</li>
+            <li class="list-group-item">Registrar novos atendimentos</li>
+            <li class="list-group-item">Consultar prontuários</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

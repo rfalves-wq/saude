@@ -1,0 +1,37 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Dashboard Recepção{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Bem-vindo, Recepção!</h1>
+    <p>Este é o seu painel de controle. Aqui você pode gerenciar agendamentos, registrar chegadas e encaminhar pacientes.</p>
+
+    <!-- Botões principais -->
+    <div class="mt-4 mb-5">
+        <a href="#" class="btn btn-primary btn-lg me-3 mb-2">
+            Ver Agendamentos
+        </a>
+        <a href="{#}" class="btn btn-success btn-lg me-3 mb-2">
+            Novo Agendamento
+        </a>
+        <a href="#" class="btn btn-info btn-lg me-3 mb-2">
+            Registrar Chegada
+        </a>
+
+        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg">Sair</button>
+        </form>
+    </div>
+
+    <div class="mt-5 text-start">
+        <h4>Opções rápidas:</h4>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item">Visualizar agenda de pacientes</li>
+            <li class="list-group-item">Registrar chegada de pacientes</li>
+            <li class="list-group-item">Encaminhar pacientes para setores</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

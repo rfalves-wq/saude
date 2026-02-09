@@ -1,4 +1,4 @@
-{% extends 'usuarios/base.html' %}
+{% extends 'usuarios/base.html' %} 
 {% load form_tags %}
 {% block title %}Lista de Usuários{% endblock %}
 
@@ -30,6 +30,9 @@
     </div>
 </form>
 
+<!-- Botão para voltar ao dashboard -->
+<a href="{% url 'admin_dashboard' %}" class="btn btn-primary mb-3">Dashboard</a>
+
 <a class="btn btn-success mb-3" href="{% url 'usuario_create' %}">Novo Usuário</a>
 
 <!-- Tabela de usuários -->
@@ -60,6 +63,7 @@
         {% endfor %}
     </tbody>
 </table>
+
 <!-- Paginação centralizada -->
 <nav aria-label="Navegação de páginas" class="mt-4">
     <ul class="pagination justify-content-center">
@@ -90,7 +94,5 @@
         {% endif %}
     </ul>
 </nav>
-
-
 
 {% endblock %}

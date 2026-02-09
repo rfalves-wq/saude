@@ -1,9 +1,36 @@
 {% extends 'usuarios/base.html' %}
 
-{% block title %}Dashboard fsfsfsfsfs{% endblock %}
+{% block title %}Dashboard Administrador{% endblock %}
 
 {% block content %}
-<h1>Bem-vindo, Administrador!</h1>
-<p>Aqui você pode gerenciar usuários e acessos.</p>
-<a href="{% url 'usuario_list' %}" class="btn btn-primary">Ver Usuários</a>
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Bem-vindo, Administrador!</h1>
+    <p>Este é o seu painel de controle. Aqui você pode gerenciar usuários e acessar todas as funcionalidades do sistema.</p>
+
+    <!-- Botões principais -->
+    <div class="mt-4 mb-5">
+        <a href="{% url 'usuario_list' %}" class="btn btn-primary btn-lg me-3 mb-2">
+            Ver Usuários
+        </a>
+        <a href="{% url 'usuario_create' %}" class="btn btn-success btn-lg me-3 mb-2">
+            Novo Usuário
+        </a>
+
+        <!-- Logout via POST -->
+        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg">Sair</button>
+        </form>
+    </div>
+
+    <!-- Seção de informações rápidas -->
+    <div class="mt-5 text-start">
+        <h4>Opções rápidas:</h4>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item">Gerenciar Médicos, Enfermeiros, Técnicos e Recepção</li>
+            <li class="list-group-item">Visualizar relatórios do sistema</li>
+            <li class="list-group-item">Alterar configurações gerais</li>
+        </ul>
+    </div>
+</div>
 {% endblock %}

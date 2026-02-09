@@ -1,1 +1,24 @@
-fsfsfsfsfs
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Dashboard Médico{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Bem-vindo, Médico!</h1>
+    <p>Este é o seu painel de controle. Aqui você pode acessar pacientes, prescrever medicamentos e visualizar relatórios.</p>
+
+    <!-- Botões principais -->
+    <div class="mt-4 mb-5">
+        <a href="{% url 'paciente_list' %}" class="btn btn-primary btn-lg me-3 mb-2">
+            Ver Pacientes
+        </a>
+        <a href="{% url 'prescricao_create' %}" class="btn btn-success btn-lg me-3 mb-2">
+            Prescrever Medicamento
+        </a>
+        <a href="{% url 'relatorio_list' %}" class="btn btn-info btn-lg me-3 mb-2">
+            Relatórios
+        </a>
+
+        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger
