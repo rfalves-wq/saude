@@ -3,26 +3,45 @@
 {% block title %}Dashboard Técnico{% endblock %}
 
 {% block content %}
-<div class="container mt-5 text-center">
-    <h1 class="mb-4">Bem-vindo, Técnico!</h1>
-    <p>Este é o seu painel de controle. Aqui você pode gerenciar equipamentos, materiais e solicitações técnicas.</p>
-
-    <!-- Botões principais -->
-    <div class="mt-4 mb-5">
-        <a href="{% url 'equipamento_list' %}" class="btn btn-primary btn-lg me-3 mb-2">
-            Ver Equipamentos
-        </a>
-        <a href="{% url 'solicitacao_create' %}" class="btn btn-success btn-lg me-3 mb-2">
-            Registrar Solicitação
-        </a>
-        <a href="{% url 'manutencao_list' %}" class="btn btn-info btn-lg me-3 mb-2">
-            Manutenções
-        </a>
-
-        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg">Sair</button>
-        </form>
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="mb-3">Bem-vindo, Técnico(a)!</h1>
+        <p class="lead">Aqui você pode acompanhar exames, coletas e procedimentos técnicos.</p>
     </div>
 
-    <div class="mt-5 text-star
+    <div class="row mt-5">
+        <!-- Card Exames -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Exames</h5>
+                    <p class="card-text">Visualize exames solicitados e resultados.</p>
+                    <a href="#" class="btn btn-primary">Ver Exames</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Coletas -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Coletas</h5>
+                    <p class="card-text">Gerencie coletas laboratoriais.</p>
+                    <a href="#" class="btn btn-success">Ver Coletas</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Meu Perfil -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Meu Perfil</h5>
+                    <p class="card-text">Visualize suas informações cadastradas.</p>
+                    <a href="#" class="btn btn-secondary">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
