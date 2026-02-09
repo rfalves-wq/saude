@@ -1,14 +1,25 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
-from .models import Usuario  # <--- import do modelo
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
-from .forms import UsuarioForm
-from .forms import LoginForm
+from django.utils import timezone
+from django.db.models import Q
 import random
 
-# Armazena temporariamente códigos 2FA (apenas para teste)
+from .models import Usuario
+from .forms import UsuarioForm, LoginForm
+from pacientes.models import Paciente
+
+
+# =========================
+# 2FA TEMPORÁRIO (teste)
+# =========================
 tfa_codes = {}
 
+
+# =========================
+# LOGIN COM 2FA
+# =========================
 def login_view(request):
     form = LoginForm(request.POST or None)
     error = None
@@ -16,7 +27,7 @@ def login_view(request):
     if request.method == 'POST':
         token = request.POST.get('token')
 
-        # ===== Segunda etapa: validação do token 2FA =====
+        # ===== SEGUNDA ETAPA (2FA) =====
         if token:
             username = request.session.get('username_temp')
             password = request.session.get('password_temp')
@@ -25,12 +36,12 @@ def login_view(request):
                 user = authenticate(request, username=username, password=password)
                 if user:
                     login(request, user)
-                    # Remove código usado e limpa sessão temporária sem gerar KeyError
+
                     tfa_codes.pop(username, None)
                     request.session.pop('username_temp', None)
                     request.session.pop('password_temp', None)
 
-                    # Redireciona por perfil
+                    # Redirecionamento por perfil
                     if user.perfil == 'administrador':
                         return redirect('admin_dashboard')
                     elif user.perfil == 'medico':
@@ -46,22 +57,19 @@ def login_view(request):
             else:
                 error = "Código 2FA inválido."
 
-        # ===== Primeira etapa: autenticação username + senha =====
+        # ===== PRIMEIRA ETAPA =====
         else:
             username = request.POST.get('username')
             password = request.POST.get('password')
 
             user = authenticate(request, username=username, password=password)
             if user:
-                # Gera código 6 dígitos para 2FA
                 code = str(random.randint(100000, 999999))
                 tfa_codes[username] = code
 
-                # Salva temporariamente username e password na sessão
                 request.session['username_temp'] = username
                 request.session['password_temp'] = password
 
-                # Renderiza tela de 2FA
                 return render(request, 'usuarios/login_2fa.html', {'code': code})
             else:
                 error = "Usuário ou senha inválidos."
@@ -69,54 +77,162 @@ def login_view(request):
     return render(request, 'usuarios/login.html', {'form': form, 'error': error})
 
 
-# ===== DASHBOARDS =====
-def admin_dashboard(request): return render(request, 'usuarios/admin_dashboard.html')
-def medico_dashboard(request): return render(request, 'usuarios/medico_dashboard.html')
-def enfermeiro_dashboard(request): return render(request, 'usuarios/enfermeiro_dashboard.html')
-def tecnico_dashboard(request): return render(request, 'usuarios/tecnico_dashboard.html')
-def recepcao_dashboard(request): return render(request, 'usuarios/recepcao_dashboard.html')
+# =========================
+# VERIFICA PERFIS
+# =========================
+def apenas_recepcao(user):
+    return user.is_authenticated and user.perfil == 'recepcao'
 
-# ===== CRUD de Usuários =====
+
+def apenas_admin(user):
+    return user.is_authenticated and user.perfil == 'administrador'
+
+
+# =========================
+# DASHBOARDS
+# =========================
+
+@login_required
+@user_passes_test(apenas_admin)
+def admin_dashboard(request):
+    return render(request, 'usuarios/admin_dashboard.html')
+
+
+@login_required
+def medico_dashboard(request):
+    return render(request, 'usuarios/medico_dashboard.html')
+
+
+@login_required
+def enfermeiro_dashboard(request):
+    return render(request, 'usuarios/enfermeiro_dashboard.html')
+
+
+@login_required
+def tecnico_dashboard(request):
+    return render(request, 'usuarios/tecnico_dashboard.html')
+
+
+# =========================
+# DASHBOARD RECEPÇÃO (COM DADOS)
+# =========================
+@login_required
+@user_passes_test(apenas_recepcao)
+def recepcao_dashboard(request):
+
+    total_pacientes = Paciente.objects.count()
+
+    total_masculino = Paciente.objects.filter(sexo_biologico='M').count()
+    total_feminino = Paciente.objects.filter(sexo_biologico='F').count()
+    total_intersexo = Paciente.objects.filter(sexo_biologico='I').count()
+
+    hoje = timezone.now().date()
+    pacientes_hoje = Paciente.objects.filter(data_criacao__date=hoje).count()
+
+    # Porcentagens automáticas
+    if total_pacientes > 0:
+        porcent_m = round((total_masculino / total_pacientes) * 100, 1)
+        porcent_f = round((total_feminino / total_pacientes) * 100, 1)
+        porcent_i = round((total_intersexo / total_pacientes) * 100, 1)
+    else:
+        porcent_m = porcent_f = porcent_i = 0
+
+    context = {
+        'total_pacientes': total_pacientes,
+        'pacientes_hoje': pacientes_hoje,
+        'total_masculino': total_masculino,
+        'total_feminino': total_feminino,
+        'total_intersexo': total_intersexo,
+        'porcent_m': porcent_m,
+        'porcent_f': porcent_f,
+        'porcent_i': porcent_i,
+    }
+
+    return render(request, 'usuarios/recepcao_dashboard.html', context)
+
+
+# =========================
+# CRUD USUÁRIOS
+# =========================
+
+@login_required
+@user_passes_test(apenas_admin)
 def usuario_list(request):
+
     busca = request.GET.get('busca', '')
     perfil_filtro = request.GET.get('perfil', 'todos')
+
     usuarios = Usuario.objects.all()
 
     if perfil_filtro != 'todos':
         usuarios = usuarios.filter(perfil=perfil_filtro)
-    if busca:
-        usuarios = usuarios.filter(username__icontains=busca) | usuarios.filter(email__icontains=busca)
 
-    paginator = Paginator(usuarios, 5)  # 5 por página
+    if busca:
+        usuarios = usuarios.filter(
+            Q(username__icontains=busca) |
+            Q(email__icontains=busca)
+        )
+
+    paginator = Paginator(usuarios, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'usuarios/usuario_list.html', {'page_obj': page_obj, 'busca': busca, 'perfil_filtro': perfil_filtro})
+    return render(
+        request,
+        'usuarios/usuario_list.html',
+        {
+            'page_obj': page_obj,
+            'busca': busca,
+            'perfil_filtro': perfil_filtro
+        }
+    )
 
+
+@login_required
+@user_passes_test(apenas_admin)
 def usuario_create(request):
+
     form = UsuarioForm(request.POST or None)
+
     if form.is_valid():
-        u = form.save(commit=False)
+        usuario = form.save(commit=False)
+
         if form.cleaned_data['password']:
-            u.set_password(form.cleaned_data['password'])
-        u.save()
+            usuario.set_password(form.cleaned_data['password'])
+
+        usuario.save()
         return redirect('usuario_list')
+
     return render(request, 'usuarios/usuario_form.html', {'form': form})
 
+
+@login_required
+@user_passes_test(apenas_admin)
 def usuario_update(request, pk):
+
     usuario = get_object_or_404(Usuario, pk=pk)
     form = UsuarioForm(request.POST or None, instance=usuario)
+
     if form.is_valid():
-        u = form.save(commit=False)
+        usuario = form.save(commit=False)
+
         if form.cleaned_data['password']:
-            u.set_password(form.cleaned_data['password'])
-        u.save()
+            usuario.set_password(form.cleaned_data['password'])
+
+        usuario.save()
         return redirect('usuario_list')
+
     return render(request, 'usuarios/usuario_form.html', {'form': form})
 
+
+@login_required
+@user_passes_test(apenas_admin)
 def usuario_delete(request, pk):
+
     usuario = get_object_or_404(Usuario, pk=pk)
+
     if request.method == 'POST':
         usuario.delete()
         return redirect('usuario_list')
+
     return render(request, 'usuarios/usuario_confirm_delete.html', {'usuario': usuario})

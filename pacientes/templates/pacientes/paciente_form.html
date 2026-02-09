@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Paciente - SUS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        body { background-color: #e6f2ff; font-family: Arial, sans-serif; }
+        h2 { color: #0057a0; }
+        .tab-pane { margin-top: 15px; }
+        .card-tab { background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        .form-control { border-radius: 5px; text-transform: uppercase; }
+        .text-danger { font-size: 0.875rem; }
+        .btn-group-center { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .nav-tabs .nav-link.active { background-color: #0072bc; color: #fff; border-radius: 10px 10px 0 0; }
+        .nav-tabs .nav-link { border-radius: 10px 10px 0 0; color: #0057a0; }
+        @media (max-width: 576px) { .btn-group-center { flex-direction: column; } }
+    </style>
+</head>
+<body>
+<div class="container mt-5 mb-5">
+    <h2 class="text-center mb-4">Cadastro de Paciente</h2>
+
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <!-- Abas -->
+        <ul class="nav nav-tabs" id="tabMenu" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button type="button" class="nav-link active" id="dados-tab" data-bs-toggle="tab" data-bs-target="#dados">Dados Pessoais</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button type="button" class="nav-link" id="contato-tab" data-bs-toggle="tab" data-bs-target="#contato">Contato</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button type="button" class="nav-link" id="sus-tab" data-bs-toggle="tab" data-bs-target="#sus">SUS / Convênio</button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content mt-3">
+
+            <!-- Dados Pessoais -->
+            <div class="tab-pane fade show active" id="dados">
+                <div class="card-tab">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">{{ form.nome.label_tag }}{{ form.nome }}{% if form.nome.errors %}<div class="text-danger">{{ form.nome.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.nome_social.label_tag }}{{ form.nome_social }}{% if form.nome_social.errors %}<div class="text-danger">{{ form.nome_social.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.nome_mae.label_tag }}{{ form.nome_mae }}{% if form.nome_mae.errors %}<div class="text-danger">{{ form.nome_mae.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.nome_pai.label_tag }}{{ form.nome_pai }}{% if form.nome_pai.errors %}<div class="text-danger">{{ form.nome_pai.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.cpf.label_tag }}{{ form.cpf }}{% if form.cpf.errors %}<div class="text-danger">{{ form.cpf.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.data_nascimento.label_tag }}{{ form.data_nascimento }}{% if form.data_nascimento.errors %}<div class="text-danger">{{ form.data_nascimento.errors }}</div>{% endif %}</div>
+                        <div class="col-md-3 mb-3">{{ form.sexo_biologico.label_tag }}{{ form.sexo_biologico }}{% if form.sexo_biologico.errors %}<div class="text-danger">{{ form.sexo_biologico.errors }}</div>{% endif %}</div>
+                        <div class="col-md-3 mb-3">{{ form.identidade_genero.label_tag }}{{ form.identidade_genero }}{% if form.identidade_genero.errors %}<div class="text-danger">{{ form.identidade_genero.errors }}</div>{% endif %}</div>
+                        <div class="col-md-3 mb-3">{{ form.orientacao_sexual.label_tag }}{{ form.orientacao_sexual }}{% if form.orientacao_sexual.errors %}<div class="text-danger">{{ form.orientacao_sexual.errors }}</div>{% endif %}</div>
+                        <div class="col-md-3 mb-3">{{ form.nacionalidade.label_tag }}{{ form.nacionalidade }}{% if form.nacionalidade.errors %}<div class="text-danger">{{ form.nacionalidade.errors }}</div>{% endif %}</div>
+                        <div class="col-md-6 mb-3">{{ form.naturalidade.label_tag }}{{ form.naturalidade }}{% if form.naturalidade.errors %}<div class="text-danger">{{ form.naturalidade.errors }}</div>{% endif %}</div>
+                        <div class="col-md-6 mb-3">{{ form.raca_cor.label_tag }}{{ form.raca_cor }}{% if form.raca_cor.errors %}<div class="text-danger">{{ form.raca_cor.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.estado_civil.label_tag }}{{ form.estado_civil }}{% if form.estado_civil.errors %}<div class="text-danger">{{ form.estado_civil.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.escolaridade.label_tag }}{{ form.escolaridade }}{% if form.escolaridade.errors %}<div class="text-danger">{{ form.escolaridade.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.profissao.label_tag }}{{ form.profissao }}{% if form.profissao.errors %}<div class="text-danger">{{ form.profissao.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.rg.label_tag }}{{ form.rg }}{% if form.rg.errors %}<div class="text-danger">{{ form.rg.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.orgao_emissor.label_tag }}{{ form.orgao_emissor }}{% if form.orgao_emissor.errors %}<div class="text-danger">{{ form.orgao_emissor.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.uf_rg.label_tag }}{{ form.uf_rg }}{% if form.uf_rg.errors %}<div class="text-danger">{{ form.uf_rg.errors }}</div>{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contato -->
+            <div class="tab-pane fade" id="contato">
+                <div class="card-tab">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">{{ form.endereco.label_tag }}{{ form.endereco }}{% if form.endereco.errors %}<div class="text-danger">{{ form.endereco.errors }}</div>{% endif %}</div>
+                        <div class="col-md-2 mb-3">{{ form.numero.label_tag }}{{ form.numero }}{% if form.numero.errors %}<div class="text-danger">{{ form.numero.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.complemento.label_tag }}{{ form.complemento }}{% if form.complemento.errors %}<div class="text-danger">{{ form.complemento.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.bairro.label_tag }}{{ form.bairro }}{% if form.bairro.errors %}<div class="text-danger">{{ form.bairro.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.municipio.label_tag }}{{ form.municipio }}{% if form.municipio.errors %}<div class="text-danger">{{ form.municipio.errors }}</div>{% endif %}</div>
+                        <div class="col-md-2 mb-3">{{ form.uf.label_tag }}{{ form.uf }}{% if form.uf.errors %}<div class="text-danger">{{ form.uf.errors }}</div>{% endif %}</div>
+                        <div class="col-md-2 mb-3">{{ form.zona.label_tag }}{{ form.zona }}{% if form.zona.errors %}<div class="text-danger">{{ form.zona.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.cep.label_tag }}{{ form.cep }}{% if form.cep.errors %}<div class="text-danger">{{ form.cep.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.telefone_fixo.label_tag }}{{ form.telefone_fixo }}{% if form.telefone_fixo.errors %}<div class="text-danger">{{ form.telefone_fixo.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3">{{ form.celular.label_tag }}{{ form.celular }}{% if form.celular.errors %}<div class="text-danger">{{ form.celular.errors }}</div>{% endif %}</div>
+                        <div class="col-md-4 mb-3 form-check">{{ form.whatsapp }}{{ form.whatsapp.label_tag }}{% if form.whatsapp.errors %}<div class="text-danger">{{ form.whatsapp.errors }}</div>{% endif %}</div>
+                        <div class="col-md-12 mb-3">{{ form.email.label_tag }}{{ form.email }}{% if form.email.errors %}<div class="text-danger">{{ form.email.errors }}</div>{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUS / Convênio -->
+            <div class="tab-pane fade" id="sus">
+                <div class="card-tab">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">{{ form.cartao_sus.label_tag }}{{ form.cartao_sus }}{% if form.cartao_sus.errors %}<div class="text-danger">{{ form.cartao_sus.errors }}</div>{% endif %}</div>
+                        <div class="col-md-6 mb-3">{{ form.convenio.label_tag }}{{ form.convenio }}{% if form.convenio.errors %}<div class="text-danger">{{ form.convenio.errors }}</div>{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="btn-group-center">
+            <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
+            <a href="{% url 'paciente_list' %}" class="btn btn-secondary btn-lg">Voltar à Lista</a>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Máscaras
+    $('#id_cpf').mask('000.000.000-00');
+    $('#id_telefone').mask('(00) 00000-0000');
+    $('#id_telefone_fixo').mask('(00) 0000-0000');
+    $('#id_celular').mask('(00) 00000-0000');
+    $('#id_cep').mask('00000-000');
+    $('#id_rg').mask('00.000.000-0');
+    $('#id_cartao_sus').mask('000 0000 0000 0000');
+    $('#id_numero').mask('00000'); // Número do endereço
+    
+    // Forçar maiúsculas em todos os inputs e textarea
+    $('input[type="text"], input[type="email"], textarea').on('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+});
+</script>
+</body>
+</html>

@@ -3,35 +3,158 @@
 {% block title %}Dashboard Recepção{% endblock %}
 
 {% block content %}
-<div class="container mt-5 text-center">
-    <h1 class="mb-4">Bem-vindo, Recepção!</h1>
-    <p>Este é o seu painel de controle. Aqui você pode gerenciar agendamentos, registrar chegadas e encaminhar pacientes.</p>
+<div class="container mt-4">
 
-    <!-- Botões principais -->
-    <div class="mt-4 mb-5">
-        <a href="#" class="btn btn-primary btn-lg me-3 mb-2">
-            Ver Agendamentos
-        </a>
-        <a href="{#}" class="btn btn-success btn-lg me-3 mb-2">
-            Novo Agendamento
-        </a>
-        <a href="#" class="btn btn-info btn-lg me-3 mb-2">
-            Registrar Chegada
-        </a>
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">
+                <i class="bi bi-speedometer2 text-primary"></i> Dashboard - Recepção
+            </h2>
+            <p class="text-muted mb-0">
+                Gerencie pacientes, agendamentos e fluxo de atendimento.
+            </p>
+        </div>
 
-        <form method="post" action="{% url 'logout' %}" class="d-inline mb-2">
+        <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-lg">Sair</button>
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </button>
         </form>
     </div>
 
-    <div class="mt-5 text-start">
-        <h4>Opções rápidas:</h4>
-        <ul class="list-group list-group-flush mt-3">
-            <li class="list-group-item">Visualizar agenda de pacientes</li>
-            <li class="list-group-item">Registrar chegada de pacientes</li>
-            <li class="list-group-item">Encaminhar pacientes para setores</li>
-        </ul>
+    <!-- ================= RESUMO ================= -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm text-center h-100 dashboard-card">
+                <div class="card-body">
+                    <i class="bi bi-people-fill fs-1 text-primary"></i>
+                    <h6 class="text-muted mt-2">Total de Pacientes</h6>
+                    <h2 class="fw-bold text-primary">{{ total_pacientes }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm text-center h-100 dashboard-card">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check-fill fs-1 text-success"></i>
+                    <h6 class="text-muted mt-2">Cadastrados Hoje</h6>
+                    <h2 class="fw-bold text-success">{{ pacientes_hoje }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2 mb-3">
+            <div class="card shadow-sm text-center h-100 dashboard-card">
+                <div class="card-body">
+                    <i class="bi bi-gender-male fs-2 text-primary"></i>
+                    <h6 class="text-muted mt-2">Masculino</h6>
+                    <h4 class="text-primary fw-bold">
+                        {{ total_masculino }}
+                        <small class="text-muted">({{ porcent_m }}%)</small>
+                    </h4>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2 mb-3">
+            <div class="card shadow-sm text-center h-100 dashboard-card">
+                <div class="card-body">
+                    <i class="bi bi-gender-female fs-2 text-danger"></i>
+                    <h6 class="text-muted mt-2">Feminino</h6>
+                    <h4 class="text-danger fw-bold">
+                        {{ total_feminino }}
+                        <small class="text-muted">({{ porcent_f }}%)</small>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2 mb-3">
+            <div class="card shadow-sm text-center h-100 dashboard-card">
+                <div class="card-body">
+                    <i class="bi bi-gender-ambiguous fs-2 text-success"></i>
+                    <h6 class="text-muted mt-2">Intersexo</h6>
+                    <h4 class="text-success fw-bold">
+                        {{ total_intersexo }}
+                        <small class="text-muted">({{ porcent_i }}%)</small>
+                    </h4>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- ================= ÁREA PRINCIPAL ================= -->
+    <div class="row">
+
+        <!-- CARD PACIENTES -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-3">
+                        <i class="bi bi-person-vcard-fill text-primary"></i> Pacientes
+                    </h4>
+                    <p class="text-muted">
+                        Cadastro, edição e consulta de pacientes.
+                    </p>
+
+                    <a href="{% url 'paciente_list' %}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-list-ul"></i> Ver Pacientes
+                    </a>
+
+                    <a href="{% url 'paciente_create' %}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Novo Paciente
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD AGENDAMENTOS -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-3">
+                        <i class="bi bi-calendar-event-fill text-success"></i> Agendamentos
+                    </h4>
+                    <p class="text-muted">
+                        Controle da agenda e fluxo de atendimento.
+                    </p>
+
+                    <a href="#" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-list-check"></i> Ver Agendamentos
+                    </a>
+
+                    <a href="#" class="btn btn-success me-2">
+                        <i class="bi bi-plus-circle"></i> Novo Agendamento
+                    </a>
+
+                    <a href="#" class="btn btn-info text-white">
+                        <i class="bi bi-check2-circle"></i> Registrar Chegada
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
+
+<!-- Estilo extra -->
+<style>
+    .dashboard-card {
+        transition: all 0.2s ease-in-out;
+        border-radius: 12px;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
 {% endblock %}
