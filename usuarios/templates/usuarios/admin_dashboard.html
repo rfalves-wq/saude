@@ -1,0 +1,9 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Dashboard fsfsfsfsfs{% endblock %}
+
+{% block content %}
+<h1>Bem-vindo, Administrador!</h1>
+<p>Aqui você pode gerenciar usuários e acessos.</p>
+<a href="{% url 'usuario_list' %}" class="btn btn-primary">Ver Usuários</a>
+{% endblock %}

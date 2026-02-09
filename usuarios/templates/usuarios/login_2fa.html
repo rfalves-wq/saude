@@ -1,0 +1,18 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Autenticação em 2 etapas</h1>
+<p>Um código de verificação foi enviado para o seu email.</p>
+
+<!-- Para teste, mostramos o código na tela -->
+<p><strong>Código de teste:</strong> {{ code }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="token" class="form-label">Código 2FA</label>
+        <input type="text" name="token" class="form-control" id="token" placeholder="Digite o código" required>
+    </div>
+    <button type="submit" class="btn btn-success">Verificar</button>
+</form>
+{% endblock %}

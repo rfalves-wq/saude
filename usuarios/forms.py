@@ -1,13 +1,13 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import Usuario
 
-class UsuarioForm(UserCreationForm):
+class UsuarioForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(), required=False)
     class Meta:
         model = Usuario
-        fields = ['username', 'email', 'perfil', 'password1', 'password2']
+        fields = ['username', 'email', 'password', 'perfil']
 
-class UsuarioUpdateForm(UserChangeForm):
-    class Meta:
-        model = Usuario
-        fields = ['username', 'email', 'perfil']
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'class':'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
+    token = forms.CharField(max_length=6, required=False, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Código 2FA'}))

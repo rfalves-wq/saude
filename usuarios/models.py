@@ -4,12 +4,12 @@ from django.db import models
 class Usuario(AbstractUser):
     PERFIL_CHOICES = [
         ('administrador', 'Administrador'),
-        ('tecnico', 'Técnico'),
         ('medico', 'Médico'),
         ('enfermeiro', 'Enfermeiro'),
+        ('tecnico', 'Técnico'),
         ('recepcao', 'Recepção'),
     ]
-    perfil = models.CharField(max_length=20, choices=PERFIL_CHOICES)
+    perfil = models.CharField(max_length=20, choices=PERFIL_CHOICES, default='recepcao')
 
     def __str__(self):
-        return f"{self.username} ({self.perfil})"
+        return self.username
