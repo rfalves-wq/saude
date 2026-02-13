@@ -6,5 +6,7 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('pacientes/', include('pacientes.urls')),
+    path('recepcao/', include('recepcao.urls')),
+
     
 ]

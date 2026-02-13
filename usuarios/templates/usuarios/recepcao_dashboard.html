@@ -129,17 +129,14 @@
                         Controle da agenda e fluxo de atendimento.
                     </p>
 
-                    <a href="#" class="btn btn-outline-primary me-2">
-                        <i class="bi bi-list-check"></i> Ver Agendamentos
-                    </a>
+                  <a href="{% url 'lista_agendamentos' %}" class="btn btn-outline-primary me-2">
+    <i class="bi bi-list-check"></i> Ver Agendamentos
+</a>
+                   <a href="{% url 'agendar_paciente' %}" class="btn btn-success me-2">
+    <i class="bi bi-plus-circle"></i> Novo Agendamento
+</a>
 
-                    <a href="#" class="btn btn-success me-2">
-                        <i class="bi bi-plus-circle"></i> Novo Agendamento
-                    </a>
-
-                    <a href="#" class="btn btn-info text-white">
-                        <i class="bi bi-check2-circle"></i> Registrar Chegada
-                    </a>
+                    
                 </div>
             </div>
         </div>

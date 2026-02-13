@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',
     'pacientes',
+    'recepcao',
 
 ]
 AUTH_USER_MODEL = 'usuarios.Usuario'

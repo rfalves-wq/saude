@@ -1,0 +1,115 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Agendar Paciente{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+
+        <div class="card shadow">
+            <div class="card-body">
+
+                <h4 class="fw-bold text-center mb-4">
+                    <i class="bi bi-calendar-plus text-success"></i>
+                    Agendar Paciente
+                </h4>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- BUSCA PACIENTE -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Buscar Paciente
+                        </label>
+
+                        <input type="text"
+                               id="buscaPaciente"
+                               class="form-control"
+                               placeholder="Digite o nome do paciente">
+
+                        <div id="resultadoBusca" 
+                             class="list-group mt-2"></div>
+
+                        {{ form.paciente }}  <!-- campo oculto -->
+                    </div>
+
+                    <!-- DATA -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Data
+                        </label>
+                        {{ form.data }}
+                    </div>
+
+                    <!-- HORA -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Hora
+                        </label>
+                        {{ form.hora }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'recepcao_dashboard' %}" 
+                           class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+
+                        <button type="submit" 
+                                class="btn btn-success">
+                            <i class="bi bi-check-circle"></i>
+                            Confirmar Agendamento
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const input = document.getElementById("buscaPaciente");
+    const resultado = document.getElementById("resultadoBusca");
+    const hiddenPaciente = document.getElementById("id_paciente");
+
+    input.addEventListener("keyup", function() {
+        let query = this.value;
+
+        if (query.length < 2) {
+            resultado.innerHTML = "";
+            return;
+        }
+
+        fetch(`/recepcao/buscar-paciente/?q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultado.innerHTML = "";
+
+                data.forEach(paciente => {
+                    let item = document.createElement("a");
+                    item.classList.add("list-group-item", "list-group-item-action");
+                    item.style.cursor = "pointer";
+                    item.textContent = paciente.nome;
+
+                    item.onclick = function() {
+                        input.value = paciente.nome;
+                        hiddenPaciente.value = paciente.id;
+                        resultado.innerHTML = "";
+                    };
+
+                    resultado.appendChild(item);
+                });
+            });
+    });
+
+});
+</script>
+
+{% endblock %}
