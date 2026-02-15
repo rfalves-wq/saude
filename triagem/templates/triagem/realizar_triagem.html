@@ -1,7 +1,77 @@
-<h2>Triagem - {{ agendamento.paciente.nome }}</h2>
+{% extends 'usuarios/base.html' %}
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Salvar Triagem</button>
-</form>
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow-lg border-0 rounded-4">
+        
+        <!-- Cabeçalho -->
+        <div class="card-header bg-danger text-white py-3">
+            <h4 class="mb-0 fw-bold">
+                <i class="bi bi-heart-pulse-fill me-2"></i>
+                Triagem - {{ agendamento.paciente.nome }}
+            </h4>
+        </div>
+
+        <!-- Corpo do Card -->
+        <div class="card-body p-4">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row g-4">
+
+                    <!-- Pressão Arterial -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="id_pressao_arterial">Pressão Arterial</label>
+                        {{ form.pressao_arterial }}
+                    </div>
+
+                    <!-- Temperatura -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="id_temperatura">Temperatura (°C)</label>
+                        {{ form.temperatura }}
+                    </div>
+
+                    <!-- Frequência Cardíaca -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="id_frequencia_cardiaca">Frequência Cardíaca</label>
+                        {{ form.frequencia_cardiaca }}
+                    </div>
+
+                    <!-- Saturação -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="id_saturacao">Saturação (%)</label>
+                        {{ form.saturacao }}
+                    </div>
+
+                    <!-- Classificação de Risco -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="id_classificacao_risco">Classificação de Risco</label>
+                        {{ form.classificacao_risco }}
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold" for="id_observacoes">Observações</label>
+                        {{ form.observacoes }}
+                    </div>
+
+                </div>
+
+                <!-- Botão Salvar -->
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-check-circle me-1"></i> Salvar Triagem
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

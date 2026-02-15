@@ -4,8 +4,8 @@
 
 {% block content %}
 
+<!-- Cabeçalho com botões -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-
     <a href="{% url 'recepcao_dashboard' %}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Voltar para Recepção
     </a>
@@ -20,72 +20,95 @@
     </a>
 </div>
 
+<!-- Filtro e contador inline -->
+<div class="d-flex align-items-center mb-4 flex-wrap">
+    <!-- Formulário de filtro -->
+    <form method="GET" class="d-flex align-items-end me-3">
+        <div class="me-2">
+            <label for="data" class="form-label fw-semibold mb-0">Filtrar por data</label>
+            <input type="date" class="form-control" id="data" name="data" value="{{ request.GET.data }}">
+        </div>
+        <div class="d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+            <a href="{% url 'lista_agendamentos' %}" class="btn btn-secondary">Limpar</a>
+        </div>
+    </form>
+
+    <!-- Contador de atendimentos -->
+{% if atendimentos_dia %}
+    <h5 class="mb-0 ms-auto">
+        {% if atendimentos_dia <= 10 %}
+            <span class="badge bg-success fs-6 p-2">
+                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+            </span>
+        {% elif atendimentos_dia <= 20 %}
+            <span class="badge bg-warning text-dark fs-6 p-2">
+                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+            </span>
+        {% else %}
+            <span class="badge bg-danger fs-6 p-2">
+                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+            </span>
+        {% endif %}
+    </h5>
+{% endif %}
+
+</div>
+
+<!-- Tabela de agendamentos -->
 <div class="card shadow-sm">
     <div class="card-body">
-
         {% if agendamentos %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-    <tr>
-        <th>Paciente</th>
-        <th>Data</th>
-        <th>Hora</th>
-        <th>Status</th>
-        <th class="text-center">Ação</th>
-    </tr>
-</thead>
-<tbody>
-    {% for a in agendamentos %}
-    <tr>
-        <td>
-            <i class="bi bi-person-fill text-primary"></i>
-            {{ a.paciente.nome }}
-        </td>
-
-        <td>
-            {{ a.data|date:"d/m/Y" }}
-        </td>
-
-        <td>
-            <i class="bi bi-clock text-secondary"></i>
-            {{ a.hora|time:"H:i" }}
-        </td>
-
-        <td>
-            {% if a.status == "AGENDADO" %}
-                <span class="badge bg-warning text-dark">Agendado</span>
-            {% elif a.status == "TRIAGEM" %}
-                <span class="badge bg-info text-dark">Em Triagem</span>
-            {% elif a.status == "FINALIZADO" %}
-                <span class="badge bg-success">Finalizado</span>
-            {% endif %}
-        </td>
-
-        <td class="text-center">
-            {% if a.status == "AGENDADO" %}
-                <a href="{% url 'enviar_para_triagem' a.id %}"
-                   class="btn btn-sm btn-primary">
-                    <i class="bi bi-arrow-right-circle"></i>
-                    Enviar
-                </a>
-            {% else %}
-                <span class="text-muted">—</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</tbody>
-
-            </table>
-        </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Status</th>
+                            <th class="text-center">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in agendamentos %}
+                        <tr 
+                            {% if a.data == today %} 
+                                class="table-primary fw-bold" 
+                            {% endif %}
+                        >
+                            <td><i class="bi bi-person-fill text-primary"></i> {{ a.paciente.nome }}</td>
+                            <td>{{ a.data|date:"d/m/Y" }}</td>
+                            <td><i class="bi bi-clock text-secondary"></i> {{ a.hora|time:"H:i" }}</td>
+                            <td>
+                                {% if a.status == "AGENDADO" %}
+                                    <span class="badge bg-warning text-dark">Agendado</span>
+                                {% elif a.status == "TRIAGEM" %}
+                                    <span class="badge bg-info text-dark">Em Triagem</span>
+                                {% elif a.status == "FINALIZADO" %}
+                                    <span class="badge bg-success">Finalizado</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if a.status == "AGENDADO" %}
+                                    <a href="{% url 'enviar_para_triagem' a.id %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-arrow-right-circle"></i> Enviar
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
             <div class="text-center py-4">
                 <i class="bi bi-calendar-x fs-1 text-muted"></i>
                 <p class="text-muted mt-2">Nenhum agendamento encontrado.</p>
             </div>
         {% endif %}
-
     </div>
 </div>
 
