@@ -1,27 +1,55 @@
 <h2>Fila da Triagem</h2>
 
-<table border="1">
-    <tr>
-        <th>Paciente</th>
-        <th>Data</th>
-        <th>Hora</th>
-        <th>Ação</th>
-    </tr>
-
-    {% for ag in fila %}
-    <tr>
-        <td>{{ ag.paciente.nome }}</td>
-        <td>{{ ag.data }}</td>
-        <td>{{ ag.hora }}</td>
-        <td>
-            <a href="{% url 'realizar_triagem' ag.id %}">
-                Iniciar Triagem
-            </a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4">Nenhum paciente na triagem</td>
-    </tr>
-    {% endfor %}
+<table border="1" id="tabela-triagem">
+    <thead>
+        <tr>
+            <th>Paciente</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
 </table>
+
+<script>
+function carregarFila() {
+    fetch("/triagem/fila-json/")
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector("#tabela-triagem tbody");
+            tbody.innerHTML = "";
+
+            data.fila.forEach(ag => {
+                const linha = `
+                    <tr>
+                        <td>${ag.paciente}</td>
+                        <td>${ag.data}</td>
+                        <td>${ag.hora}</td>
+                        <td>
+                            <a href="/triagem/realizar/${ag.id}/">
+                                Iniciar Triagem
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += linha;
+            });
+
+            if (data.fila.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4">Nenhum paciente na triagem</td>
+                    </tr>
+                `;
+            }
+        });
+}
+
+// Atualiza a cada 5 segundos
+setInterval(carregarFila, 5000);
+
+// Carrega imediatamente ao abrir a página
+carregarFila();
+</script>

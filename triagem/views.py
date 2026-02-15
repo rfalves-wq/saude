@@ -38,3 +38,19 @@ def historico_triagens(request):
     return render(request, 'triagem/historico_triagens.html', {
         'triagens': triagens
     })
+
+from django.http import JsonResponse
+
+def fila_triagem_json(request):
+    fila = Agendamento.objects.filter(status="Em Triagem")
+
+    dados = []
+    for ag in fila:
+        dados.append({
+            "id": ag.id,
+            "paciente": ag.paciente.nome,
+            "data": ag.data.strftime("%d/%m/%Y"),
+            "hora": ag.hora.strftime("%H:%M"),
+        })
+
+    return JsonResponse({"fila": dados})
