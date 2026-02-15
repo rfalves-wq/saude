@@ -7,4 +7,5 @@ urlpatterns = [
     path('historico/', views.historico_triagens, name='historico_triagens'),
 path('fila-json/', views.fila_triagem_json, name='fila_triagem_json'),
 
+
 ]

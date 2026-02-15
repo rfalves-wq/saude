@@ -1,25 +1,77 @@
-<h2>Fila da Triagem</h2>
+{% extends 'usuarios/base.html' %}
+{% block content %}
 
-<table border="1" id="tabela-triagem">
-    <thead>
-        <tr>
-            <th>Paciente</th>
-            <th>Data</th>
-            <th>Hora</th>
-            <th>Ação</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+<div class="container mt-5">
 
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        
+        <div class="card-header bg-gradient bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0 fw-bold">
+                <i class="bi bi-clipboard2-pulse me-2"></i> Fila da Triagem
+            </h4>
+            <span class="badge bg-light text-dark px-3 py-2 fs-6 shadow-sm" id="contador">
+                0 pacientes
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+             <table class="table table-hover align-middle text-center mb-0 table-borderless" id="tabela-triagem">
+
+                    
+                  <thead class="table-light text-uppercase small border-bottom">
+
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="fw-semibold">
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
 <script>
 function carregarFila() {
     fetch("/triagem/fila-json/")
         .then(response => response.json())
         .then(data => {
+
             const tbody = document.querySelector("#tabela-triagem tbody");
+            const contador = document.getElementById("contador");
+
             tbody.innerHTML = "";
+
+            if (data.fila.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-4 text-muted">
+                            <i class="bi bi-emoji-smile"></i>
+                            Nenhum paciente aguardando triagem
+                        </td>
+                    </tr>
+                `;
+
+                contador.innerText = "0 pacientes";
+                contador.classList.remove("bg-success", "text-white");
+                contador.classList.add("bg-light", "text-dark");
+                return;
+            }
 
             data.fila.forEach(ag => {
                 const linha = `
@@ -28,8 +80,9 @@ function carregarFila() {
                         <td>${ag.data}</td>
                         <td>${ag.hora}</td>
                         <td>
-                            <a href="/triagem/realizar/${ag.id}/">
-                                Iniciar Triagem
+                            <a href="/triagem/realizar/${ag.id}/"
+                               class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                               <i class="bi bi-play-fill"></i> Iniciar
                             </a>
                         </td>
                     </tr>
@@ -37,19 +90,19 @@ function carregarFila() {
                 tbody.innerHTML += linha;
             });
 
-            if (data.fila.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4">Nenhum paciente na triagem</td>
-                    </tr>
-                `;
-            }
+            contador.innerText = `${data.fila.length} paciente(s)`;
+            contador.classList.remove("bg-light", "text-dark");
+            contador.classList.add("bg-success", "text-white");
+
+        })
+        .catch(error => {
+            console.error("Erro ao carregar fila:", error);
         });
 }
 
-// Atualiza a cada 5 segundos
 setInterval(carregarFila, 5000);
-
-// Carrega imediatamente ao abrir a página
 carregarFila();
 </script>
+{% endblock %}
+
+

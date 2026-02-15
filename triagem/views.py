@@ -51,6 +51,7 @@ def fila_triagem_json(request):
             "paciente": ag.paciente.nome,
             "data": ag.data.strftime("%d/%m/%Y"),
             "hora": ag.hora.strftime("%H:%M"),
+            'classificacao': ag.triagem.classificacao_risco if hasattr(ag, 'triagem') else None
         })
 
     return JsonResponse({"fila": dados})

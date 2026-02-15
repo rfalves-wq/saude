@@ -9,5 +9,6 @@ class TriagemForm(forms.ModelForm):
             'temperatura',
             'frequencia_cardiaca',
             'saturacao',
+            'classificacao_risco',
             'observacoes'
         ]
