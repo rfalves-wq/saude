@@ -20,7 +20,7 @@
     </a>
 </div>
 
-<!-- Filtro e contador inline -->
+<!-- Filtro e contador na mesma linha -->
 <div class="d-flex align-items-center mb-4 flex-wrap">
     <!-- Formulário de filtro -->
     <form method="GET" class="d-flex align-items-end me-3">
@@ -35,24 +35,23 @@
     </form>
 
     <!-- Contador de atendimentos -->
-{% if atendimentos_dia %}
-    <h5 class="mb-0 ms-auto">
-        {% if atendimentos_dia <= 10 %}
-            <span class="badge bg-success fs-6 p-2">
-                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
-            </span>
-        {% elif atendimentos_dia <= 20 %}
-            <span class="badge bg-warning text-dark fs-6 p-2">
-                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
-            </span>
-        {% else %}
-            <span class="badge bg-danger fs-6 p-2">
-                {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
-            </span>
-        {% endif %}
-    </h5>
-{% endif %}
-
+    {% if atendimentos_dia %}
+        <h5 class="mb-0 ms-auto">
+            {% if atendimentos_dia <= 10 %}
+                <span class="badge bg-success fs-6 p-2">
+                    {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+                </span>
+            {% elif atendimentos_dia <= 20 %}
+                <span class="badge bg-warning text-dark fs-6 p-2">
+                    {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+                </span>
+            {% else %}
+                <span class="badge bg-danger fs-6 p-2">
+                    {{ atendimentos_dia }} atendimentos - {{ data_filtro }}
+                </span>
+            {% endif %}
+        </h5>
+    {% endif %}
 </div>
 
 <!-- Tabela de agendamentos -->
@@ -72,11 +71,8 @@
                     </thead>
                     <tbody>
                         {% for a in agendamentos %}
-                        <tr 
-                            {% if a.data == today %} 
-                                class="table-primary fw-bold" 
-                            {% endif %}
-                        >
+                        <!-- Linha destacada se for do dia atual -->
+                        <tr {% if a.data == today %} class="table-primary fw-bold" {% endif %}>
                             <td><i class="bi bi-person-fill text-primary"></i> {{ a.paciente.nome }}</td>
                             <td>{{ a.data|date:"d/m/Y" }}</td>
                             <td><i class="bi bi-clock text-secondary"></i> {{ a.hora|time:"H:i" }}</td>

@@ -4,6 +4,7 @@ from .models import Agendamento
 from .forms import AgendamentoForm
 from pacientes.models import Paciente
 from django.http import JsonResponse
+from django.utils import timezone
 
 @login_required
 def agendar_paciente(request):
@@ -19,7 +20,14 @@ def agendar_paciente(request):
     return render(request, 'recepcao/agendar.html', {'form': form})
 from django.utils import timezone
 
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Agendamento
+
 @login_required
+
+
 def lista_agendamentos(request):
     # pega todos os agendamentos
     agendamentos = Agendamento.objects.all().order_by('-data', 'hora')
@@ -31,17 +39,23 @@ def lista_agendamentos(request):
         atendimentos_dia = agendamentos.count()
     else:
         # se não selecionar data, mostrar agendamentos do dia atual
-        hoje = timezone.now().date()
+        hoje = timezone.localdate()  # usa localdate() para data sem hora
         agendamentos_hoje = agendamentos.filter(data=hoje)
         atendimentos_dia = agendamentos_hoje.count()
+
+    # define today para destacar a linha do dia atual
+    today = timezone.localdate()
 
     context = {
         'agendamentos': agendamentos,
         'request': request,
         'atendimentos_dia': atendimentos_dia,
-        'data_filtro': data_filtro or timezone.now().date()
+        'data_filtro': data_filtro or today,
+        'today': today,  # <-- variável necessária para template
+        
     }
     return render(request, 'recepcao/lista.html', context)
+
 
 
 @login_required
