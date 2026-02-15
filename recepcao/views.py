@@ -57,3 +57,9 @@ def buscar_paciente(request):
     ]
 
     return JsonResponse(data, safe=False)
+
+def enviar_para_triagem(request, id):
+    agendamento = get_object_or_404(Agendamento, id=id)
+    agendamento.status = "Em Triagem"
+    agendamento.save()
+    return redirect('lista_agendamentos')

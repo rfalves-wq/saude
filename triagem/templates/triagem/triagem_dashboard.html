@@ -1,0 +1,27 @@
+<h2>Fila da Triagem</h2>
+
+<table border="1">
+    <tr>
+        <th>Paciente</th>
+        <th>Data</th>
+        <th>Hora</th>
+        <th>Ação</th>
+    </tr>
+
+    {% for ag in fila %}
+    <tr>
+        <td>{{ ag.paciente.nome }}</td>
+        <td>{{ ag.data }}</td>
+        <td>{{ ag.hora }}</td>
+        <td>
+            <a href="{% url 'realizar_triagem' ag.id %}">
+                Iniciar Triagem
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Nenhum paciente na triagem</td>
+    </tr>
+    {% endfor %}
+</table>
