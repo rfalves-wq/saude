@@ -95,6 +95,20 @@ def iniciar_atendimento(request, triagem_id):
 @login_required
 def editar_atendimento(request, atendimento_id):
     atendimento = get_object_or_404(Atendimento, id=atendimento_id)
+    paciente = atendimento.paciente
+    hoje = timezone.localdate()
+
+    # Todos os atendimentos do paciente hoje, ordenados pelo horário
+    atendimentos_hoje = Atendimento.objects.filter(
+        paciente=paciente,
+        data_atendimento__date=hoje
+    ).order_by('data_atendimento')
+
+    # Lista de tuplas: (prescricao, medico que prescreveu)
+    medicacoes_dia = [
+        (a.prescricao, a.medico.get_full_name()) 
+        for a in atendimentos_hoje if a.prescricao
+    ]
 
     if request.method == "POST":
         atendimento.diagnostico = request.POST.get("diagnostico")
@@ -104,14 +118,13 @@ def editar_atendimento(request, atendimento_id):
         atendimento.decisao = decisao
 
         # Só finaliza se médico dispensar o paciente
-        if decisao == "dispensar":
-            atendimento.finalizado = True
-        else:
-            atendimento.finalizado = False
+        atendimento.finalizado = decisao == "dispensar"
 
         atendimento.save()
         return redirect("medico_dashboard")
 
     return render(request, "medico/atendimento.html", {
-        "atendimento": atendimento
+        "atendimento": atendimento,
+        "medicacoes_dia": medicacoes_dia,
+        "atendimentos_hoje": atendimentos_hoje,
     })

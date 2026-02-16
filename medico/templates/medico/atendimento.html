@@ -1,7 +1,18 @@
 {% extends 'usuarios/base.html' %}
 {% block content %}
-
 <h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
+
+{% if medicacoes_dia %}
+    <div class="alert alert-info">
+        <strong>Medicações já prescritas hoje:</strong>
+        <ul>
+            {% for prescricao in medicacoes_dia %}
+                <li>{{ prescricao }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 
 <form method="post">
     {% csrf_token %}
@@ -33,5 +44,4 @@
 
     <button type="submit" class="btn btn-success">Salvar</button>
 </form>
-
 {% endblock %}

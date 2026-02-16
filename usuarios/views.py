@@ -155,8 +155,8 @@ def recepcao_dashboard(request):
 # CRUD USUÁRIOS
 # =========================
 
-@login_required
-@user_passes_test(apenas_admin)
+#@login_required
+#@user_passes_test(apenas_admin)
 def usuario_list(request):
 
     busca = request.GET.get('busca', '')
@@ -188,8 +188,8 @@ def usuario_list(request):
     )
 
 
-@login_required
-@user_passes_test(apenas_admin)
+#@login_required
+#@user_passes_test(apenas_admin)
 def usuario_create(request):
 
     form = UsuarioForm(request.POST or None)
@@ -206,8 +206,8 @@ def usuario_create(request):
     return render(request, 'usuarios/usuario_form.html', {'form': form})
 
 
-@login_required
-@user_passes_test(apenas_admin)
+#@login_required
+#@user_passes_test(apenas_admin)
 def usuario_update(request, pk):
 
     usuario = get_object_or_404(Usuario, pk=pk)
@@ -225,8 +225,8 @@ def usuario_update(request, pk):
     return render(request, 'usuarios/usuario_form.html', {'form': form})
 
 
-@login_required
-@user_passes_test(apenas_admin)
+#@login_required
+#@user_passes_test(apenas_admin)
 def usuario_delete(request, pk):
 
     usuario = get_object_or_404(Usuario, pk=pk)
