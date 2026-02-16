@@ -33,7 +33,7 @@ def iniciar_atendimento(request, triagem_id):
     atendimento = Atendimento.objects.create(
         paciente=triagem.paciente,
         medico=request.user,
-        queixa=triagem.queixa
+        queixa=triagem.observacoes
     )
 
     triagem.atendido = True
