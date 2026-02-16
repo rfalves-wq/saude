@@ -3,7 +3,9 @@
 
 <div class="container mt-4">
 
-    <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
+    <!-- ✅ Cabeçalho -->
+    <h2 class="mb-2">👨‍⚕️ Dashboard Médico</h2>
+    <h5 class="text-secondary mb-4">Médico logado: {{ request.user.get_full_name|default:request.user.username }}</h5>
 
     <!-- CARDS -->
     <div class="row mb-4">
@@ -28,14 +30,35 @@
 
     </div>
 
-    <!-- TABELA -->
-    <div class="card shadow-sm">
+    <!-- TABELA DE TOTAIS -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-info">
+                <div class="card-body text-center">
+                    <h6>Atendimentos Hoje</h6>
+                    <h3 class="text-info">{{ total_dia }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-dark">
+                <div class="card-body text-center">
+                    <h6>Atendimentos no Mês</h6>
+                    <h3 class="text-dark">{{ total_mes }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA DE TRIAGENS -->
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">
             Triagens Aguardando Atendimento
         </div>
 
         <div class="card-body">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -47,41 +70,98 @@
 
                 <tbody>
                     {% for t in triagens %}
-                    <tr>
-                        <td>{{ t.paciente.nome }}</td>
-
+                    <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
+                        <td class="fw-bold">{{ t.paciente.nome }}</td>
                         <td>
                             {% if t.classificacao_risco == "Vermelho" %}
                                 <span class="badge bg-danger">Vermelho</span>
+                            {% elif t.classificacao_risco == "Laranja" %}
+                                <span class="badge" style="background-color: #fd7e14;">Laranja</span>
                             {% elif t.classificacao_risco == "Amarelo" %}
                                 <span class="badge bg-warning text-dark">Amarelo</span>
-                            {% else %}
+                            {% elif t.classificacao_risco == "Verde" %}
                                 <span class="badge bg-success">Verde</span>
+                            {% elif t.classificacao_risco == "Azul" %}
+                                <span class="badge bg-primary">Azul</span>
                             {% endif %}
                         </td>
-
                         <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
-
                         <td>
-                            <a href="{% url 'iniciar_atendimento' t.id %}" 
-                               class="btn btn-sm btn-primary">
-                                Atender
-                            </a>
+                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted">
-                            Nenhuma triagem pendente
-                        </td>
+                        <td colspan="4" class="text-center text-muted">Nenhuma triagem pendente</td>
                     </tr>
                     {% endfor %}
                 </tbody>
+            </table>
+        </div>
+    </div>
 
+    <!-- TABELA DE ATENDIMENTOS FINALIZADOS -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            Atendimentos Finalizados
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Data do Atendimento</th>
+                        <th>Diagnóstico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in atendimentos_finalizados %}
+                    <tr>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
+                        <td>{{ a.diagnostico|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
 
 </div>
+
+<!-- ESTILO ALERTA -->
+<style>
+.alerta-vermelho {
+    animation: piscar 0.8s infinite;
+    font-weight: bold;
+}
+@keyframes piscar {
+    0% { background-color: #ffd6d6; }
+    50% { background-color: #ff0000; color: white; }
+    100% { background-color: #ffd6d6; }
+}
+</style>
+
+<!-- SCRIPT DE ALERTA -->
+<script>
+// Atualiza automaticamente a cada 5 segundos
+setInterval(function(){ location.reload(); }, 5000);
+
+// Toca alerta se houver triagem vermelha
+document.addEventListener("DOMContentLoaded", function() {
+    let existeVermelho = document.querySelector(".alerta-vermelho");
+    if (existeVermelho) {
+        setTimeout(function(){
+            let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+            audio.play().catch(e => console.log("Som bloqueado pelo navegador"));
+        }, 500);
+    }
+});
+</script>
 
 {% endblock %}
