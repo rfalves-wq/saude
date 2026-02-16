@@ -1,4 +1,17 @@
 <h2>Atendimento - {{ atendimento.paciente.nome }}</h2>
+<div class="card mb-3">
+    <div class="card-header bg-info text-white">
+        Dados da Triagem
+    </div>
+    <div class="card-body">
+        <p><strong>Temperatura:</strong> {{ atendimento.triagem.temperatura }} °C</p>
+        <p><strong>Pressão:</strong> {{ atendimento.triagem.pressao_arterial }}</p>
+        <p><strong>Frequência Cardíaca:</strong> {{ atendimento.triagem.frequencia_cardiaca }}</p>
+        <p><strong>Saturação:</strong> {{ atendimento.triagem.saturacao }}%</p>
+        <p><strong>Classificação:</strong> {{ atendimento.triagem.classificacao_risco }}</p>
+        <p><strong>Observações:</strong> {{ atendimento.triagem.observacoes }}</p>
+    </div>
+</div>
 
 <form method="post">
     {% csrf_token %}

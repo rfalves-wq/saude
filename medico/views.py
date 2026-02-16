@@ -33,13 +33,14 @@ def iniciar_atendimento(request, triagem_id):
     atendimento = Atendimento.objects.create(
         paciente=triagem.paciente,
         medico=request.user,
-        queixa=triagem.observacoes
+        triagem=triagem
     )
 
     triagem.atendido = True
     triagem.save()
 
     return redirect('editar_atendimento', atendimento.id)
+
 
 
 @login_required
