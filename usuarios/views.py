@@ -226,7 +226,7 @@ def usuario_update(request, pk):
 
 
 @login_required
-#@user_passes_test(apenas_admin)
+@user_passes_test(apenas_admin)
 def usuario_delete(request, pk):
 
     usuario = get_object_or_404(Usuario, pk=pk)

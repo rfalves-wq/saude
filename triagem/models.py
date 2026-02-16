@@ -18,6 +18,7 @@ class Triagem(models.Model):
     temperatura = models.DecimalField(max_digits=4, decimal_places=1)
     frequencia_cardiaca = models.IntegerField()
     saturacao = models.IntegerField()
+    atendido = models.BooleanField(default=False)
 
     classificacao_risco = models.CharField(
         max_length=10,

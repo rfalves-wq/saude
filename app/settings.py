@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'pacientes',
     'recepcao',
     'triagem',
+    'medico',
 
 ]
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -107,6 +108,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
+
+LOGIN_URL = '/usuarios/login/'
+LOGIN_REDIRECT_URL = '/usuarios/'
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

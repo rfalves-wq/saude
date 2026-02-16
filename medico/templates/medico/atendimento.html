@@ -1,0 +1,18 @@
+<h2>Atendimento - {{ atendimento.paciente.nome }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Diagnóstico</label>
+    <textarea name="diagnostico" class="form-control"></textarea>
+
+    <label>Prescrição</label>
+    <textarea name="prescricao" class="form-control"></textarea>
+
+    <label>Observações</label>
+    <textarea name="observacoes" class="form-control"></textarea>
+
+    <button type="submit" class="btn btn-success mt-3">
+        Finalizar Atendimento
+    </button>
+</form>

@@ -1,0 +1,87 @@
+{% extends 'usuarios/base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
+
+    <!-- CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <h5>Triagens Pendentes</h5>
+                    <h2 class="text-primary">{{ total_pendentes }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-success">
+                <div class="card-body text-center">
+                    <h5>Atendimentos Finalizados</h5>
+                    <h2 class="text-success">{{ total_atendidos }}</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABELA -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            Triagens Aguardando Atendimento
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Classificação</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for t in triagens %}
+                    <tr>
+                        <td>{{ t.paciente.nome }}</td>
+
+                        <td>
+                            {% if t.classificacao_risco == "Vermelho" %}
+                                <span class="badge bg-danger">Vermelho</span>
+                            {% elif t.classificacao_risco == "Amarelo" %}
+                                <span class="badge bg-warning text-dark">Amarelo</span>
+                            {% else %}
+                                <span class="badge bg-success">Verde</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
+
+                        <td>
+                            <a href="{% url 'iniciar_atendimento' t.id %}" 
+                               class="btn btn-sm btn-primary">
+                                Atender
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Nenhuma triagem pendente
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
