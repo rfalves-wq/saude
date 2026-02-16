@@ -1,0 +1,20 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+
+<h3>Confirmar Exclusão</h3>
+
+<p>Tem certeza que deseja excluir:</p>
+<strong>{{ paciente.nome }}</strong>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">
+        Confirmar Exclusão
+    </button>
+    <a href="{% url 'paciente_list' %}" class="btn btn-secondary">
+        Cancelar
+    </a>
+</form>
+
+{% endblock %}
