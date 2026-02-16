@@ -29,4 +29,3 @@ class Atendimento(models.Model):
 
     def __str__(self):
         return f"{self.paciente.nome} - {self.data_atendimento}"
-

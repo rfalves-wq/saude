@@ -2,37 +2,29 @@
 {% block content %}
 
 <div class="container mt-4">
+    <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
-    <!-- ✅ Cabeçalho -->
-    <h2 class="mb-2">👨‍⚕️ Dashboard Médico</h2>
-    <h5 class="text-secondary mb-4">Médico logado: {{ request.user.get_full_name|default:request.user.username }}</h5>
-
-    <!-- CARDS -->
+    <!-- CARDS PRINCIPAIS -->
     <div class="row mb-4">
-
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card shadow-sm border-primary">
                 <div class="card-body text-center">
-                    <h5>Triagens Pendentes</h5>
-                    <h2 class="text-primary">{{ total_pendentes }}</h2>
+                    <h6>Triagens Pendentes</h6>
+                    <h3 class="text-primary">{{ total_pendentes }}</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card shadow-sm border-success">
                 <div class="card-body text-center">
-                    <h5>Atendimentos Finalizados</h5>
-                    <h2 class="text-success">{{ total_atendidos }}</h2>
+                    <h6>Atendimentos Finalizados</h6>
+                    <h3 class="text-success">{{ total_atendidos }}</h3>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- TABELA DE TOTAIS -->
-    <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card shadow-sm border-info">
                 <div class="card-body text-center">
                     <h6>Atendimentos Hoje</h6>
@@ -41,7 +33,7 @@
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card shadow-sm border-dark">
                 <div class="card-body text-center">
                     <h6>Atendimentos no Mês</h6>
@@ -51,12 +43,9 @@
         </div>
     </div>
 
-    <!-- TABELA DE TRIAGENS -->
+    <!-- TRIAGENS PENDENTES -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white">
-            Triagens Aguardando Atendimento
-        </div>
-
+        <div class="card-header bg-dark text-white">Triagens Aguardando Atendimento</div>
         <div class="card-body">
             <table class="table table-hover align-middle">
                 <thead>
@@ -67,16 +56,15 @@
                         <th>Ação</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {% for t in triagens %}
                     <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
-                        <td class="fw-bold">{{ t.paciente.nome }}</td>
+                        <td>{{ t.paciente.nome }}</td>
                         <td>
                             {% if t.classificacao_risco == "Vermelho" %}
                                 <span class="badge bg-danger">Vermelho</span>
                             {% elif t.classificacao_risco == "Laranja" %}
-                                <span class="badge" style="background-color: #fd7e14;">Laranja</span>
+                                <span class="badge bg-orange" style="background-color: #fd7e14;">Laranja</span>
                             {% elif t.classificacao_risco == "Amarelo" %}
                                 <span class="badge bg-warning text-dark">Amarelo</span>
                             {% elif t.classificacao_risco == "Verde" %}
@@ -100,31 +88,32 @@
         </div>
     </div>
 
-    <!-- TABELA DE ATENDIMENTOS FINALIZADOS -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-secondary text-white">
-            Atendimentos Finalizados
-        </div>
-
+    <!-- PACIENTES EM MEDICAÇÃO / INTERNAÇÃO -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark">Pacientes em Medicação / Internação</div>
         <div class="card-body">
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Paciente</th>
-                        <th>Data do Atendimento</th>
-                        <th>Diagnóstico</th>
+                        <th>Decisão</th>
+                        <th>Data Atendimento</th>
+                        <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for a in atendimentos_finalizados %}
+                    {% for a in atendimentos_ativos %}
                     <tr>
                         <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.get_decisao_display }}</td>
                         <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
-                        <td>{{ a.diagnostico|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'editar_atendimento' a.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
+                        <td colspan="4" class="text-center text-muted">Nenhum paciente em medicação ou internação</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -134,7 +123,7 @@
 
 </div>
 
-<!-- ESTILO ALERTA -->
+<!-- ALERTA VERMELHO -->
 <style>
 .alerta-vermelho {
     animation: piscar 0.8s infinite;
@@ -147,18 +136,16 @@
 }
 </style>
 
-<!-- SCRIPT DE ALERTA -->
+<!-- AUTORELOAD + ALERTA SONORO -->
 <script>
-// Atualiza automaticamente a cada 5 segundos
 setInterval(function(){ location.reload(); }, 5000);
 
-// Toca alerta se houver triagem vermelha
 document.addEventListener("DOMContentLoaded", function() {
     let existeVermelho = document.querySelector(".alerta-vermelho");
     if (existeVermelho) {
         setTimeout(function(){
             let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
-            audio.play().catch(e => console.log("Som bloqueado pelo navegador"));
+            audio.play().catch(e => console.log("Som bloqueado"));
         }, 500);
     }
 });

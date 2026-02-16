@@ -1,59 +1,37 @@
 {% extends 'usuarios/base.html' %}
 {% block content %}
 
-<div class="container mt-4">
-    <h2 class="mb-4">👨‍⚕️ Atendimento de {{ atendimento.paciente.nome }}</h2>
+<h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
 
-    <form method="POST">
-        {% csrf_token %}
-        
-        <!-- Diagnóstico -->
-        <div class="mb-3">
-            <label class="form-label fw-bold">Diagnóstico</label>
-            <textarea name="diagnostico" class="form-control" rows="3">{{ atendimento.diagnostico }}</textarea>
-        </div>
+<form method="post">
+    {% csrf_token %}
 
-        <!-- Prescrição -->
-        <div class="mb-3">
-            <label class="form-label fw-bold">Prescrição</label>
-            <textarea name="prescricao" class="form-control" rows="2">{{ atendimento.prescricao }}</textarea>
-        </div>
+    <div class="mb-3">
+        <label>Diagnóstico</label>
+        <textarea name="diagnostico" class="form-control">{{ atendimento.diagnostico }}</textarea>
+    </div>
 
-        <!-- Observações -->
-        <div class="mb-3">
-            <label class="form-label fw-bold">Observações</label>
-            <textarea name="observacoes" class="form-control" rows="2">{{ atendimento.observacoes }}</textarea>
-        </div>
+    <div class="mb-3">
+        <label>Prescrição</label>
+        <textarea name="prescricao" class="form-control">{{ atendimento.prescricao }}</textarea>
+    </div>
 
-        <!-- Decisão do Médico -->
-        <div class="mb-3">
-            <label class="form-label fw-bold">Decisão do Médico</label>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="decisao" id="dispensar" value="dispensar" {% if atendimento.decisao == "dispensar" %}checked{% endif %}>
-                <label class="form-check-label text-success" for="dispensar">Dispensar</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="decisao" id="medicacao" value="medicacao" {% if atendimento.decisao == "medicacao" %}checked{% endif %}>
-                <label class="form-check-label text-primary" for="medicacao">Medicação</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="decisao" id="internacao" value="internacao" {% if atendimento.decisao == "internacao" %}checked{% endif %}>
-                <label class="form-check-label text-danger" for="internacao">Internação</label>
-            </div>
-        </div>
+    <div class="mb-3">
+        <label>Observações</label>
+        <textarea name="observacoes" class="form-control">{{ atendimento.observacoes }}</textarea>
+    </div>
 
-        <!-- Botão Finalizar -->
-        <button type="submit" class="btn btn-success">Finalizar Atendimento</button>
-        <a href="{% url 'medico_dashboard' %}" class="btn btn-secondary">Voltar</a>
-    </form>
-</div>
+    <div class="mb-3">
+        <label>Decisão</label>
+        <select name="decisao" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            <option value="dispensar" {% if atendimento.decisao == "dispensar" %}selected{% endif %}>Dispensar</option>
+            <option value="medicacao" {% if atendimento.decisao == "medicacao" %}selected{% endif %}>Medicação</option>
+            <option value="internacao" {% if atendimento.decisao == "internacao" %}selected{% endif %}>Internação</option>
+        </select>
+    </div>
 
-<!-- Estilo extra para destacar decisões -->
-<style>
-.form-check-input:checked + .form-check-label {
-    font-weight: bold;
-    text-decoration: underline;
-}
-</style>
+    <button type="submit" class="btn btn-success">Salvar</button>
+</form>
 
 {% endblock %}
