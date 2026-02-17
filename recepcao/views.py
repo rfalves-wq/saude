@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Agendamento
-from .forms import AgendamentoForm
-from pacientes.models import Paciente
 from django.http import JsonResponse
 from django.utils import timezone
 
+from .models import Agendamento
+from .forms import AgendamentoForm
+from pacientes.models import Paciente
+
+# =============================
+# AGENDAMENTO DE PACIENTE
+# =============================
 @login_required
 def agendar_paciente(request):
     if request.method == 'POST':
@@ -14,50 +18,47 @@ def agendar_paciente(request):
             agendamento = form.save(commit=False)
             agendamento.criado_por = request.user
             agendamento.save()
+            # Redireciona para lista para evitar POST duplicado
             return redirect('lista_agendamentos')
+        else:
+            # Formulário inválido: envia erros para o template
+            return render(request, 'recepcao/agendar.html', {'form': form, 'errors': form.errors})
     else:
         form = AgendamentoForm()
     return render(request, 'recepcao/agendar.html', {'form': form})
-from django.utils import timezone
 
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Agendamento
 
+# =============================
+# LISTA DE AGENDAMENTOS
+# =============================
 @login_required
-
-
 def lista_agendamentos(request):
-    # pega todos os agendamentos
     agendamentos = Agendamento.objects.all().order_by('-data', 'hora')
 
-    # filtrar por data
+    # Filtrar por data se houver
     data_filtro = request.GET.get('data')
     if data_filtro:
         agendamentos = agendamentos.filter(data=data_filtro)
         atendimentos_dia = agendamentos.count()
     else:
-        # se não selecionar data, mostrar agendamentos do dia atual
-        hoje = timezone.localdate()  # usa localdate() para data sem hora
+        hoje = timezone.localdate()
         agendamentos_hoje = agendamentos.filter(data=hoje)
         atendimentos_dia = agendamentos_hoje.count()
 
-    # define today para destacar a linha do dia atual
-    today = timezone.localdate()
+    today = timezone.localdate()  # para destacar linha do dia atual no template
 
     context = {
         'agendamentos': agendamentos,
-        'request': request,
         'atendimentos_dia': atendimentos_dia,
         'data_filtro': data_filtro or today,
-        'today': today,  # <-- variável necessária para template
-        
+        'today': today,
     }
     return render(request, 'recepcao/lista.html', context)
 
 
-
+# =============================
+# ENVIAR PACIENTE PARA TRIAGEM
+# =============================
 @login_required
 def enviar_para_triagem(request, id):
     agendamento = get_object_or_404(Agendamento, id=id)
@@ -66,16 +67,20 @@ def enviar_para_triagem(request, id):
     return redirect('lista_agendamentos')
 
 
+# =============================
+# LISTA DE PACIENTES EM TRIAGEM
+# =============================
 @login_required
 def lista_triagem(request):
     pacientes_triagem = Agendamento.objects.filter(status='Em Triagem')
     return render(request, 'triagem/lista_triagem.html', {'pacientes': pacientes_triagem})
 
+
+# =============================
+# BUSCAR PACIENTE (AJAX)
+# =============================
 def buscar_paciente(request):
     termo = request.GET.get('q', '')
     pacientes = Paciente.objects.filter(nome__icontains=termo)[:10]
-    data = [
-        {"id": p.id, "nome": p.nome}
-        for p in pacientes
-    ]
+    data = [{"id": p.id, "nome": p.nome} for p in pacientes]
     return JsonResponse(data, safe=False)

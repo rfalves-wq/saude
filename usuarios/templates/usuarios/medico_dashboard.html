@@ -1,47 +1,169 @@
 {% extends 'usuarios/base.html' %}
 
-{% block title %}Dashboard Médico{% endblock %}
-
 {% block content %}
-<div class="container mt-5">
-    <div class="text-center">
-        <h1 class="mb-3">Bem-vindo, Doutor(a)!</h1>
-        <p class="lead">Este é o seu painel médico. Aqui você pode acompanhar pacientes e atendimentos.</p>
+
+<div class="container mt-4">
+
+    <!-- TÍTULO E SAUDAÇÃO -->
+    <h2 class="mb-2">👨‍⚕️ Dashboard Médico</h2>
+
+    {% now "H" as hora_atual %}
+    <p class="text-muted">
+        {% if hora_atual < "12" %}
+            Bom dia
+        {% elif hora_atual < "18" %}
+            Boa tarde
+        {% else %}
+            Boa noite
+        {% endif %},
+        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+    </p>
+
+    <!-- CARDS PRINCIPAIS -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <h6>Triagens Pendentes</h6>
+                    <h3 class="text-primary">{{ total_pendentes }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-success">
+                <div class="card-body text-center">
+                    <h6>Atendimentos Finalizados</h6>
+                    <h3 class="text-success">{{ total_atendidos }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-info">
+                <div class="card-body text-center">
+                    <h6>Atendimentos Hoje</h6>
+                    <h3 class="text-info">{{ total_dia }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-dark">
+                <div class="card-body text-center">
+                    <h6>Atendimentos no Mês</h6>
+                    <h3 class="text-dark">{{ total_mes }}</h3>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row mt-5">
-        <!-- Card Pacientes -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Pacientes</h5>
-                    <p class="card-text">Visualize e acompanhe seus pacientes.</p>
-                    <a href="#" class="btn btn-primary">Ver Pacientes</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card Atendimentos -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Atendimentos</h5>
-                    <p class="card-text">Gerencie consultas e registros clínicos.</p>
-                    <a href="#" class="btn btn-success">Ver Atendimentos</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card Perfil -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Meu Perfil</h5>
-                    <p class="card-text">Visualize suas informações de cadastro.</p>
-                    <a href="#" class="btn btn-secondary">Ver Perfil</a>
-                </div>
-            </div>
+    <!-- TRIAGENS PENDENTES -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">Triagens Aguardando Atendimento</div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Classificação</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in triagens %}
+                    <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
+                        <td>{{ t.paciente.nome }}</td>
+                        <td>
+                            {% if t.classificacao_risco == "Vermelho" %}
+                                <span class="badge bg-danger">Vermelho</span>
+                            {% elif t.classificacao_risco == "Laranja" %}
+                                <span class="badge bg-orange" style="background-color: #fd7e14;">Laranja</span>
+                            {% elif t.classificacao_risco == "Amarelo" %}
+                                <span class="badge bg-warning text-dark">Amarelo</span>
+                            {% elif t.classificacao_risco == "Verde" %}
+                                <span class="badge bg-success">Verde</span>
+                            {% elif t.classificacao_risco == "Azul" %}
+                                <span class="badge bg-primary">Azul</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Nenhuma triagem pendente</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <!-- PACIENTES EM MEDICAÇÃO / INTERNAÇÃO -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark">Pacientes em Medicação / Internação</div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Decisão</th>
+                        <th>Data Atendimento</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in atendimentos_ativos %}
+                    <tr>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.get_decisao_display }}</td>
+                        <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'editar_atendimento' a.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Nenhum paciente em medicação ou internação</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
+
+<!-- ALERTA VERMELHO -->
+<style>
+.alerta-vermelho {
+    animation: piscar 0.8s infinite;
+    font-weight: bold;
+}
+@keyframes piscar {
+    0% { background-color: #ffd6d6; }
+    50% { background-color: #ff0000; color: white; }
+    100% { background-color: #ffd6d6; }
+}
+</style>
+
+<!-- AUTORELOAD + ALERTA SONORO -->
+<script>
+setInterval(function(){ location.reload(); }, 5000);
+
+document.addEventListener("DOMContentLoaded", function() {
+    let existeVermelho = document.querySelector(".alerta-vermelho");
+    if (existeVermelho) {
+        setTimeout(function(){
+            let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+            audio.play().catch(e => console.log("Som bloqueado"));
+        }, 500);
+    }
+});
+</script>
+
 {% endblock %}

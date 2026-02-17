@@ -104,21 +104,37 @@ def editar_atendimento(request, atendimento_id):
         data_atendimento__date=hoje
     ).order_by('data_atendimento')
 
-    # Lista de tuplas: (prescricao, medico que prescreveu)
+    # Lista de tuplas: (prescricao, medico que prescreveu, hora)
     medicacoes_dia = [
-        (a.prescricao, a.medico.get_full_name()) 
-        for a in atendimentos_hoje if a.prescricao
+        (a.prescricao, a.medico.get_full_name(), a.data_atendimento.time())
+        for a in atendimentos_hoje
+        if a.prescricao and a.prescricao.strip() != ""  # ignora prescrição vazia
     ]
 
+    # ✅ Pode dispensar se houver qualquer medicação hoje (independente do médico)
+    pode_dispensar = len(medicacoes_dia) > 0
+
     if request.method == "POST":
+        decisao = request.POST.get("decisao")
+        atendimento.decisao = decisao
         atendimento.diagnostico = request.POST.get("diagnostico")
         atendimento.prescricao = request.POST.get("prescricao")
         atendimento.observacoes = request.POST.get("observacoes")
-        decisao = request.POST.get("decisao")
-        atendimento.decisao = decisao
 
-        # Só finaliza se médico dispensar o paciente
-        atendimento.finalizado = decisao == "dispensar"
+        if decisao == "dispensar":
+            if pode_dispensar:
+                atendimento.finalizado = True
+            else:
+                from django.contrib import messages
+                messages.error(request, "Paciente ainda não recebeu medicação hoje.")
+                return render(request, "medico/atendimento.html", {
+                    "atendimento": atendimento,
+                    "medicacoes_dia": medicacoes_dia,
+                    "atendimentos_hoje": atendimentos_hoje,
+                    "pode_dispensar": pode_dispensar,
+                })
+        else:
+            atendimento.finalizado = False
 
         atendimento.save()
         return redirect("medico_dashboard")
@@ -127,4 +143,5 @@ def editar_atendimento(request, atendimento_id):
         "atendimento": atendimento,
         "medicacoes_dia": medicacoes_dia,
         "atendimentos_hoje": atendimentos_hoje,
+        "pode_dispensar": pode_dispensar,
     })
