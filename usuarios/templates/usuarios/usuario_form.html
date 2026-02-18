@@ -1,22 +1,152 @@
 {% extends 'usuarios/base.html' %}
-{% load form_tags %}
 
-{% block title %}Formulário de Usuário{% endblock %}
+{% block title %}
+    {% if form.instance.pk %}Editar Usuário{% else %}Cadastrar Usuário{% endif %}
+{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Formulário de Usuário</h1>
-<form method="post" class="needs-validation" novalidate>
-    {% csrf_token %}
-    {% for field in form %}
-        <div class="mb-3">
-            <label class="form-label">{{ field.label }}</label>
-            {{ field|add_class:"form-control" }}
-            {% if field.errors %}
-                <div class="text-danger">{{ field.errors }}</div>
-            {% endif %}
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header text-center bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-person-plus"></i>
+                {% if form.instance.pk %}Editar Usuário{% else %}Cadastrar Usuário{% endif %}
+            </h4>
         </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-success">Salvar</button>
-    <a href="{% url 'usuario_list' %}" class="btn btn-secondary">Voltar</a>
-</form>
+
+        <div class="card-body">
+
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- ===== GRID 2 COLUNAS ===== -->
+                <div class="row g-3">
+
+                    <!-- DADOS BÁSICOS -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nome</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Sobrenome</label>
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Perfil</label>
+                        {{ form.perfil }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">CPF</label>
+                        {{ form.cpf }}
+                    </div>
+
+                    <!-- DATA NASCIMENTO E TELEFONE -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Data de Nascimento</label>
+                        {{ form.data_nascimento }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Telefone</label>
+                        {{ form.telefone }}
+                    </div>
+
+                    <!-- ENDEREÇO -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Endereço</label>
+                        {{ form.endereco }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Cidade</label>
+                        {{ form.cidade }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Estado</label>
+                        {{ form.estado }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">CEP</label>
+                        {{ form.cep }}
+                    </div>
+
+                    <!-- CRM / COREN -->
+                    <div class="col-md-6" id="crm_field">
+                        <label class="form-label fw-semibold">CRM (Médico)</label>
+                        {{ form.crm }}
+                    </div>
+                    <div class="col-md-6" id="coren_field">
+                        <label class="form-label fw-semibold">COREN (Enfermeiro)</label>
+                        {{ form.coren }}
+                    </div>
+
+                    <!-- SENHA -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Senha</label>
+                        {{ form.password }}
+                        {% if form.instance.pk %}
+                            <small class="text-muted d-block">Deixe em branco para manter a senha atual.</small>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- BOTÕES -->
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'usuario_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Salvar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS PARA MOSTRAR/OCULTAR CRM/COREN -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const perfilSelect = document.getElementById('id_perfil');
+    const crmField = document.getElementById('crm_field');
+    const corenField = document.getElementById('coren_field');
+
+    function toggleFields() {
+        const perfil = perfilSelect.value;
+        crmField.style.display = (perfil === 'medico') ? 'block' : 'none';
+        corenField.style.display = (perfil === 'enfermeiro') ? 'block' : 'none';
+    }
+
+    perfilSelect.addEventListener('change', toggleFields);
+    toggleFields();
+});
+</script>
+
 {% endblock %}

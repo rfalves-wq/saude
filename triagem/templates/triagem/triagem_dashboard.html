@@ -5,23 +5,30 @@
 
     <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
         
+        <!-- Cabeçalho com título, botão Home e contador -->
         <div class="card-header bg-gradient bg-primary text-white d-flex justify-content-between align-items-center py-3">
             <h4 class="mb-0 fw-bold">
                 <i class="bi bi-clipboard2-pulse me-2"></i> Fila da Triagem
             </h4>
-            <span class="badge bg-light text-dark px-3 py-2 fs-6 shadow-sm" id="contador">
-                0 pacientes
-            </span>
+            
+            <div class="d-flex align-items-center">
+                <!-- Botão Home -->
+                <a href="/usuarios/dashboard/enfermeiro/" class="btn btn-light btn-sm rounded-pill me-3 shadow-sm">
+                    <i class="bi bi-house-door-fill me-1"></i> Home
+                </a>
+
+                <!-- Contador de pacientes -->
+                <span class="badge bg-light text-dark px-3 py-2 fs-6 shadow-sm" id="contador">
+                    0 pacientes
+                </span>
+            </div>
         </div>
 
+        <!-- Corpo do card com tabela -->
         <div class="card-body p-0">
-
             <div class="table-responsive">
-             <table class="table table-hover align-middle text-center mb-0 table-borderless" id="tabela-triagem">
-
-                    
-                  <thead class="table-light text-uppercase small border-bottom">
-
+                <table class="table table-hover align-middle text-center mb-0 table-borderless" id="tabela-triagem">
+                    <thead class="table-light text-uppercase small border-bottom">
                         <tr>
                             <th>Paciente</th>
                             <th>Data</th>
@@ -29,21 +36,18 @@
                             <th>Ação</th>
                         </tr>
                     </thead>
-
                     <tbody class="fw-semibold">
+                        <!-- Linhas serão preenchidas pelo JS -->
                     </tbody>
-
                 </table>
             </div>
-
         </div>
+
     </div>
 
 </div>
 
 {% endblock %}
-
-
 
 {% block scripts %}
 <script>
@@ -66,7 +70,6 @@ function carregarFila() {
                         </td>
                     </tr>
                 `;
-
                 contador.innerText = "0 pacientes";
                 contador.classList.remove("bg-success", "text-white");
                 contador.classList.add("bg-light", "text-dark");
@@ -100,9 +103,8 @@ function carregarFila() {
         });
 }
 
+// Atualiza a fila a cada 5 segundos
 setInterval(carregarFila, 5000);
 carregarFila();
 </script>
 {% endblock %}
-
-

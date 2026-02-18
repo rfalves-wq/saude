@@ -10,12 +10,10 @@ from .models import Usuario
 from .forms import UsuarioForm, LoginForm
 from pacientes.models import Paciente
 
-
 # =========================
 # 2FA TEMPORÁRIO (teste)
 # =========================
 tfa_codes = {}
-
 
 # =========================
 # LOGIN COM 2FA
@@ -36,7 +34,6 @@ def login_view(request):
                 user = authenticate(request, username=username, password=password)
                 if user:
                     login(request, user)
-
                     tfa_codes.pop(username, None)
                     request.session.pop('username_temp', None)
                     request.session.pop('password_temp', None)
@@ -66,16 +63,13 @@ def login_view(request):
             if user:
                 code = str(random.randint(100000, 999999))
                 tfa_codes[username] = code
-
                 request.session['username_temp'] = username
                 request.session['password_temp'] = password
-
                 return render(request, 'usuarios/login_2fa.html', {'code': code})
             else:
                 error = "Usuário ou senha inválidos."
 
     return render(request, 'usuarios/login.html', {'form': form, 'error': error})
-
 
 # =========================
 # VERIFICA PERFIS
@@ -83,45 +77,36 @@ def login_view(request):
 def apenas_recepcao(user):
     return user.is_authenticated and user.perfil == 'recepcao'
 
-
 def apenas_admin(user):
     return user.is_authenticated and user.perfil == 'administrador'
-
 
 # =========================
 # DASHBOARDS
 # =========================
-
 @login_required
 @user_passes_test(apenas_admin)
 def admin_dashboard(request):
     return render(request, 'usuarios/admin_dashboard.html')
 
-
 @login_required
 def medico_dashboard(request):
     return render(request, 'usuarios/medico_dashboard.html')
-
 
 @login_required
 def enfermeiro_dashboard(request):
     return render(request, 'usuarios/enfermeiro_dashboard.html')
 
-
 @login_required
 def tecnico_dashboard(request):
     return render(request, 'usuarios/tecnico_dashboard.html')
 
-
 # =========================
-# DASHBOARD RECEPÇÃO (COM DADOS)
+# DASHBOARD RECEPÇÃO
 # =========================
 @login_required
 @user_passes_test(apenas_recepcao)
 def recepcao_dashboard(request):
-
     total_pacientes = Paciente.objects.count()
-
     total_masculino = Paciente.objects.filter(sexo_biologico='M').count()
     total_feminino = Paciente.objects.filter(sexo_biologico='F').count()
     total_intersexo = Paciente.objects.filter(sexo_biologico='I').count()
@@ -129,7 +114,6 @@ def recepcao_dashboard(request):
     hoje = timezone.now().date()
     pacientes_hoje = Paciente.objects.filter(data_criacao__date=hoje).count()
 
-    # Porcentagens automáticas
     if total_pacientes > 0:
         porcent_m = round((total_masculino / total_pacientes) * 100, 1)
         porcent_f = round((total_feminino / total_pacientes) * 100, 1)
@@ -147,92 +131,78 @@ def recepcao_dashboard(request):
         'porcent_f': porcent_f,
         'porcent_i': porcent_i,
     }
-
     return render(request, 'usuarios/recepcao_dashboard.html', context)
-
 
 # =========================
 # CRUD USUÁRIOS
 # =========================
-
 #@login_required
 #@user_passes_test(apenas_admin)
-def usuario_list(request):
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 
-    busca = request.GET.get('busca', '')
+def usuario_list(request):
+    busca = request.GET.get('busca', '').strip()
     perfil_filtro = request.GET.get('perfil', 'todos')
 
     usuarios = Usuario.objects.all()
 
+    # Filtra por perfil
     if perfil_filtro != 'todos':
         usuarios = usuarios.filter(perfil=perfil_filtro)
 
+    # Busca por username, email, cpf ou nome completo
     if busca:
-        usuarios = usuarios.filter(
+        usuarios = usuarios.annotate(
+            nome_completo=Concat('first_name', Value(' '), 'last_name')
+        ).filter(
             Q(username__icontains=busca) |
-            Q(email__icontains=busca)
+            Q(email__icontains=busca) |
+            Q(cpf__icontains=busca) |
+            Q(nome_completo__icontains=busca)
         )
 
-    paginator = Paginator(usuarios, 5)
+    paginator = Paginator(usuarios, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(
-        request,
-        'usuarios/usuario_list.html',
-        {
-            'page_obj': page_obj,
-            'busca': busca,
-            'perfil_filtro': perfil_filtro
-        }
-    )
+    return render(request, 'usuarios/usuario_list.html', {
+        'page_obj': page_obj,
+        'busca': busca,
+        'perfil_filtro': perfil_filtro
+    })
 
 
 #@login_required
 #@user_passes_test(apenas_admin)
 def usuario_create(request):
-
     form = UsuarioForm(request.POST or None)
-
     if form.is_valid():
         usuario = form.save(commit=False)
-
-        if form.cleaned_data['password']:
+        if form.cleaned_data.get('password'):
             usuario.set_password(form.cleaned_data['password'])
-
         usuario.save()
         return redirect('usuario_list')
-
     return render(request, 'usuarios/usuario_form.html', {'form': form})
-
 
 #@login_required
 #@user_passes_test(apenas_admin)
 def usuario_update(request, pk):
-
     usuario = get_object_or_404(Usuario, pk=pk)
     form = UsuarioForm(request.POST or None, instance=usuario)
-
     if form.is_valid():
         usuario = form.save(commit=False)
-
-        if form.cleaned_data['password']:
+        if form.cleaned_data.get('password'):
             usuario.set_password(form.cleaned_data['password'])
-
         usuario.save()
         return redirect('usuario_list')
-
     return render(request, 'usuarios/usuario_form.html', {'form': form})
-
 
 #@login_required
 #@user_passes_test(apenas_admin)
 def usuario_delete(request, pk):
-
     usuario = get_object_or_404(Usuario, pk=pk)
-
     if request.method == 'POST':
         usuario.delete()
         return redirect('usuario_list')
-
     return render(request, 'usuarios/usuario_confirm_delete.html', {'usuario': usuario})
