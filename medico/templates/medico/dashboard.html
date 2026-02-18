@@ -1,5 +1,7 @@
 {% extends 'usuarios/base.html' %}
 
+{% block title %}Dashboard Médico{% endblock %}
+
 {% block content %}
 
 <!-- USUÁRIO LOGADO FIXO NO TOPO DIREITO -->
@@ -19,42 +21,38 @@
 </div>
 
 <div class="container mt-4">
-
-    <!-- TÍTULO DO DASHBOARD -->
+    <!-- TÍTULO -->
     <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
     <!-- CARDS PRINCIPAIS -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm border-primary">
-                <div class="card-body text-center">
+            <div class="card shadow-sm border-primary text-center">
+                <div class="card-body">
                     <h6>Triagens Pendentes</h6>
                     <h3 class="text-primary">{{ total_pendentes }}</h3>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-success">
-                <div class="card-body text-center">
+            <div class="card shadow-sm border-success text-center">
+                <div class="card-body">
                     <h6>Atendimentos Finalizados</h6>
                     <h3 class="text-success">{{ total_atendidos }}</h3>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-info">
-                <div class="card-body text-center">
+            <div class="card shadow-sm border-info text-center">
+                <div class="card-body">
                     <h6>Atendimentos Hoje</h6>
                     <h3 class="text-info">{{ total_dia }}</h3>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-dark">
-                <div class="card-body text-center">
+            <div class="card shadow-sm border-dark text-center">
+                <div class="card-body">
                     <h6>Atendimentos no Mês</h6>
                     <h3 class="text-dark">{{ total_mes }}</h3>
                 </div>
@@ -83,7 +81,7 @@
                             {% if t.classificacao_risco == "Vermelho" %}
                                 <span class="badge bg-danger">Vermelho</span>
                             {% elif t.classificacao_risco == "Laranja" %}
-                                <span class="badge bg-orange" style="background-color: #fd7e14;">Laranja</span>
+                                <span class="badge" style="background-color: #fd7e14;">Laranja</span>
                             {% elif t.classificacao_risco == "Amarelo" %}
                                 <span class="badge bg-warning text-dark">Amarelo</span>
                             {% elif t.classificacao_risco == "Verde" %}
@@ -115,24 +113,40 @@
                 <thead>
                     <tr>
                         <th>Paciente</th>
-                        <th>Decisão</th>
-                        <th>Data Atendimento</th>
+                        <th>Prescrição / Decisão</th>
+                        <th>Horário</th>
                         <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for a in atendimentos_ativos %}
+                    {% for a in aguardando_medicacao %}
                     <tr>
                         <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.get_decisao_display }}</td>
-                        <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
+                        <td>{{ a.prescricao|default:"-" }}</td>
+                        <td>{{ a.horario_medicacao|date:"d/m/Y H:i"|default:"-" }}</td>
+                        <td><span class="badge bg-warning">Aguardando técnico</span></td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for a in medicacao_aplicada %}
+                    <tr>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.prescricao|default:"-" }}</td>
+                        <td>{{ a.horario_medicacao|date:"d/m/Y H:i"|default:"-" }}</td>
                         <td>
-                            <a href="{% url 'editar_atendimento' a.id %}" class="btn btn-sm btn-warning">Editar</a>
+                            <a href="{% url 'decidir_atendimento' a.id %}" class="btn btn-primary btn-sm">
+                                Dispensar / Internar
+                            </a>
                         </td>
                     </tr>
-                    {% empty %}
+                    {% endfor %}
+
+                    {% for a in internacoes %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Nenhum paciente em medicação ou internação</td>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.prescricao|default:"-" }}</td>
+                        <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
+                        <td><span class="badge bg-danger">Internado</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -140,9 +154,37 @@
         </div>
     </div>
 
+    <!-- ATENDIMENTOS FINALIZADOS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">Atendimentos Finalizados</div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Prescrição</th>
+                        <th>Data Atendimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in atendimentos_finalizados %}
+                    <tr>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.prescricao|default:"-" }}</td>
+                        <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<!-- ALERTA VERMELHO -->
+<!-- ESTILOS -->
 <style>
 .usuario-topo {
     position: fixed;
@@ -154,7 +196,6 @@
     padding: 5px 10px;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
-
 .alerta-vermelho {
     animation: piscar 0.8s infinite;
     font-weight: bold;
@@ -169,7 +210,6 @@
 <!-- AUTORELOAD + ALERTA SONORO -->
 <script>
 setInterval(function(){ location.reload(); }, 5000);
-
 document.addEventListener("DOMContentLoaded", function() {
     let existeVermelho = document.querySelector(".alerta-vermelho");
     if (existeVermelho) {

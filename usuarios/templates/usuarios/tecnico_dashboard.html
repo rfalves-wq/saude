@@ -43,5 +43,20 @@
             </div>
         </div>
     </div>
+    <!-- Card Medicações -->
+<div class="col-md-4 mb-4">
+    <div class="card shadow-sm border-danger">
+        <div class="card-body text-center">
+            <h5 class="card-title">Medicações</h5>
+            <p class="card-text">
+                {{ medicacoes_pendentes.count }} paciente(s) aguardando medicação.
+            </p>
+            <a href="{% url 'lista_medicacao' %}" class="btn btn-danger">
+                Ver Medicações
+            </a>
+        </div>
+    </div>
+</div>
+
 </div>
 {% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Decidir Atendimento{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3>Decisão do Atendimento</h3>
+
+    <p><strong>Paciente:</strong> {{ atendimento.paciente.nome }}</p>
+    <p><strong>Prescrição:</strong> {{ atendimento.prescricao|default:"-" }}</p>
+    <p><strong>Técnico:</strong>
+        {% if atendimento.tecnico_aplicou.get_full_name %}
+            {{ atendimento.tecnico_aplicou.get_full_name }}
+        {% else %}
+            {{ atendimento.tecnico_aplicou.username }}
+        {% endif %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Decisão:</label>
+            <select class="form-select" name="decisao" required>
+                <option value="dispensar">Dispensar</option>
+                <option value="internacao">Internação</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Confirmar</button>
+    </form>
+</div>
+{% endblock %}

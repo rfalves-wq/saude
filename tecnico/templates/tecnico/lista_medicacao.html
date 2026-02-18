@@ -1,0 +1,59 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Pacientes para Medicação{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">💊 Pacientes para Medicação</h2>
+
+    <!-- DIV que será atualizada -->
+    <div id="tabela-medicacao">
+        <table class="table table-striped table-bordered shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Prescrição</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for atendimento in atendimentos %}
+                <tr>
+                    <td>{{ atendimento.paciente.nome }}</td>
+                    <td>
+                        {% if atendimento.medico.get_full_name %}
+                            {{ atendimento.medico.get_full_name }}
+                        {% else %}
+                            {{ atendimento.medico.username }}
+                        {% endif %}
+                    </td>
+                    <td>{{ atendimento.prescricao|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'administrar_medicacao' atendimento.id %}"
+                           class="btn btn-success btn-sm">
+                            Administrar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Nenhuma medicação pendente.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Colocar dentro do template, por exemplo no final do content -->
+<script>
+  // Atualiza a página a cada 5 segundos
+  setInterval(function() {
+      location.reload();
+  }, 5000);
+</script>
+
+{% endblock %}

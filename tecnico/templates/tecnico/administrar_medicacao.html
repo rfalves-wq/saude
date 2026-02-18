@@ -1,0 +1,24 @@
+<h3>Confirmar Administração</h3>
+
+<p><strong>Paciente:</strong> {{ atendimento.paciente.nome }}</p>
+<p><strong>Prescrição:</strong>
+    {% if atendimento.prescricao %}
+        {{ atendimento.prescricao }}
+    {% else %}
+        -
+    {% endif %}
+</p>
+<p><strong>Técnico:</strong>
+    {% if request.user.get_full_name %}
+        {{ request.user.get_full_name }}
+    {% else %}
+        {{ request.user.username }}
+    {% endif %}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">
+        Confirmar Administração
+    </button>
+</form>

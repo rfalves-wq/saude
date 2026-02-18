@@ -1,142 +1,139 @@
 {% extends 'usuarios/base.html' %}
 
+{% block title %}Dashboard Médico{% endblock %}
+
 {% block content %}
-
 <div class="container mt-4">
+    <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
-    <!-- TÍTULO E SAUDAÇÃO -->
-    <h2 class="mb-2">👨‍⚕️ Dashboard Médico</h2>
-
-    {% now "H" as hora_atual %}
-    <p class="text-muted">
-        {% if hora_atual < "12" %}
-            Bom dia
-        {% elif hora_atual < "18" %}
-            Boa tarde
-        {% else %}
-            Boa noite
-        {% endif %},
-        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-    </p>
-
-    <!-- CARDS PRINCIPAIS -->
+    <!-- Totais -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm border-primary">
-                <div class="card-body text-center">
-                    <h6>Triagens Pendentes</h6>
-                    <h3 class="text-primary">{{ total_pendentes }}</h3>
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Pendentes</h5>
+                    <p class="card-text">{{ total_pendentes }}</p>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-success">
-                <div class="card-body text-center">
-                    <h6>Atendimentos Finalizados</h6>
-                    <h3 class="text-success">{{ total_atendidos }}</h3>
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Atendidos</h5>
+                    <p class="card-text">{{ total_atendidos }}</p>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-info">
-                <div class="card-body text-center">
-                    <h6>Atendimentos Hoje</h6>
-                    <h3 class="text-info">{{ total_dia }}</h3>
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Hoje</h5>
+                    <p class="card-text">{{ total_dia }}</p>
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
-            <div class="card shadow-sm border-dark">
-                <div class="card-body text-center">
-                    <h6>Atendimentos no Mês</h6>
-                    <h3 class="text-dark">{{ total_mes }}</h3>
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Mês</h5>
+                    <p class="card-text">{{ total_mes }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TRIAGENS PENDENTES -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white">Triagens Aguardando Atendimento</div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Classificação</th>
-                        <th>Data</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in triagens %}
-                    <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
-                        <td>{{ t.paciente.nome }}</td>
-                        <td>
-                            {% if t.classificacao_risco == "Vermelho" %}
-                                <span class="badge bg-danger">Vermelho</span>
-                            {% elif t.classificacao_risco == "Laranja" %}
-                                <span class="badge bg-orange" style="background-color: #fd7e14;">Laranja</span>
-                            {% elif t.classificacao_risco == "Amarelo" %}
-                                <span class="badge bg-warning text-dark">Amarelo</span>
-                            {% elif t.classificacao_risco == "Verde" %}
-                                <span class="badge bg-success">Verde</span>
-                            {% elif t.classificacao_risco == "Azul" %}
-                                <span class="badge bg-primary">Azul</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
-                        <td>
-                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">Nenhuma triagem pendente</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <!-- Triagens Pendentes -->
+    <h3>Triagens Pendentes</h3>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Classificação</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in triagens %}
+            <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
+                <td>{{ t.paciente.nome }}</td>
+                <td>{{ t.classificacao_risco }}</td>
+                <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhuma triagem pendente</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <!-- PACIENTES EM MEDICAÇÃO / INTERNAÇÃO -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-warning text-dark">Pacientes em Medicação / Internação</div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Decisão</th>
-                        <th>Data Atendimento</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in atendimentos_ativos %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.get_decisao_display }}</td>
-                        <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
-                        <td>
-                            <a href="{% url 'editar_atendimento' a.id %}" class="btn btn-sm btn-warning">Editar</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">Nenhum paciente em medicação ou internação</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <!-- Pacientes aguardando técnico aplicar medicação -->
+    <h3>Medicação Pendentes (Técnico)</h3>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Prescrição</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in aguardando_medicacao %}
+            <tr>
+                <td>{{ a.paciente.nome }}</td>
+                <td>{{ a.prescricao|default:"-" }}</td>
+                <td><span class="badge bg-warning">Aguardando técnico</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhum paciente aguardando medicação</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <!-- Medicação aplicada (Aguardando decisão do médico) -->
+    <h3>Medicação Aplicada (Aguardando Decisão)</h3>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Prescrição</th>
+                <th>Técnico</th>
+                <th>Horário</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in medicacao_aplicada %}
+            <tr>
+                <td>{{ a.paciente.nome }}</td>
+                <td>{{ a.prescricao|default:"-" }}</td>
+                <td>
+                    {% if a.tecnico_aplicou.get_full_name %}
+                        {{ a.tecnico_aplicou.get_full_name }}
+                    {% else %}
+                        {{ a.tecnico_aplicou.username }}
+                    {% endif %}
+                </td>
+                <td>{{ a.horario_medicacao|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <!-- BOTÃO PARA DECISÃO -->
+                    <a href="{% url 'decidir_atendimento' a.id %}" class="btn btn-primary btn-sm">
+                        Dispensar / Internar
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhum paciente aguardando decisão</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+{% endblock %}
+
 
 <!-- ALERTA VERMELHO -->
 <style>

@@ -13,13 +13,6 @@
                 <li>{{ prescricao }} — <em>{{ medico }}</em> às {{ hora|time:"H:i" }}</li>
             {% endfor %}
         </ul>
-
-        {% if pode_dispensar %}
-            <div class="alert alert-success mt-2">
-                O paciente já recebeu medicação hoje. Qualquer médico pode dispensá-lo.<br>
-                Primeira medicação às {{ medicacoes_dia.0.2|time:"H:i" }}
-            </div>
-        {% endif %}
     </div>
 {% endif %}
 
@@ -45,15 +38,22 @@
         <label>Decisão</label>
         <select name="decisao" class="form-select" required>
             <option value="">-- Selecione --</option>
-            <option value="dispensar" {% if not pode_dispensar %}disabled{% endif %}>
+
+            <option value="dispensar"
+                {% if atendimento.decisao == "dispensar" %}selected{% endif %}>
                 Dispensar
             </option>
-            <option value="medicacao" {% if atendimento.decisao == "medicacao" %}selected{% endif %}>Medicação</option>
-            <option value="internacao" {% if atendimento.decisao == "internacao" %}selected{% endif %}>Internação</option>
+
+            <option value="medicacao"
+                {% if atendimento.decisao == "medicacao" %}selected{% endif %}>
+                Medicação
+            </option>
+
+            <option value="internacao"
+                {% if atendimento.decisao == "internacao" %}selected{% endif %}>
+                Internação
+            </option>
         </select>
-        {% if not pode_dispensar %}
-            <small class="text-muted">O paciente ainda não recebeu medicação hoje. Não é possível dispensar.</small>
-        {% endif %}
     </div>
 
     <button type="submit" class="btn btn-success">Salvar</button>

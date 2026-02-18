@@ -17,12 +17,26 @@ class Atendimento(models.Model):
         ("medicacao", "Medicação"),
         ("internacao", "Internação"),
     ]
+
     decisao = models.CharField(
         max_length=20,
         choices=DECISAO_CHOICES,
         blank=True,
         null=True
     )
+
+    # 🔵 CONTROLE DA MEDICAÇÃO
+    medicacao_aplicada = models.BooleanField(default=False)
+
+    tecnico_aplicou = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="medicacoes_aplicadas"
+    )
+
+    horario_medicacao = models.DateTimeField(null=True, blank=True)
 
     data_atendimento = models.DateTimeField(auto_now_add=True)
     finalizado = models.BooleanField(default=False)
