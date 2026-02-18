@@ -22,8 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==============================
 SECRET_KEY = 'django-insecure-$t*&9np((m-hx0m12q%-vc@f#$ox7k!w-+8-wxlx@19_e20bnb'
 DEBUG = True  # Somente para desenvolvimento
-ALLOWED_HOSTS = []  # Em produção: ['meusite.com', 'www.meusite.com']
-
+#ALLOWED_HOSTS = []  # Em produção: ['meusite.com', 'www.meusite.com']
+ALLOWED_HOSTS = ['*']
 # ==============================
 # INSTALLED APPS
 # ==============================

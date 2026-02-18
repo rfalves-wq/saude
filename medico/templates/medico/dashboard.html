@@ -154,34 +154,35 @@
         </div>
     </div>
 
-    <!-- ATENDIMENTOS FINALIZADOS -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-success text-white">Atendimentos Finalizados</div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Prescrição</th>
-                        <th>Data Atendimento</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in atendimentos_finalizados %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+   <!-- ATENDIMENTOS FINALIZADOS -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">Atendimentos Finalizados</div>
+    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Paciente</th>
+                    <th>Prescrição</th>
+                    <th>Data Atendimento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in atendimentos_finalizados %}
+                <tr>
+                    <td>{{ a.paciente.nome }}</td>
+                    <td>{{ a.prescricao|default:"-" }}</td>
+                    <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
+
 </div>
 
 <!-- ESTILOS -->
