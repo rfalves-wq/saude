@@ -6,28 +6,35 @@ from django.utils import timezone
 from .models import Agendamento
 from .forms import AgendamentoForm
 from pacientes.models import Paciente
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .forms import AgendamentoForm
+from .models import Agendamento
+from pacientes.models import Paciente
 
-# =============================
-# AGENDAMENTO DE PACIENTE
-# =============================
 @login_required
-def agendar_paciente(request):
+def agendar_paciente(request, paciente_id=None):
+    paciente = None
+    if paciente_id:
+        paciente = get_object_or_404(Paciente, id=paciente_id)
+
     if request.method == 'POST':
         form = AgendamentoForm(request.POST)
         if form.is_valid():
             agendamento = form.save(commit=False)
             agendamento.criado_por = request.user
             agendamento.save()
-            # Redireciona para lista para evitar POST duplicado
-            return redirect('lista_agendamentos')
-        else:
-            # Formulário inválido: envia erros para o template
-            return render(request, 'recepcao/agendar.html', {'form': form, 'errors': form.errors})
+            # Mensagem de sucesso
+            return redirect('lista_agendamentos')  # Redireciona após salvar
     else:
-        form = AgendamentoForm()
-    return render(request, 'recepcao/agendar.html', {'form': form})
+        initial_data = {'paciente': paciente} if paciente else {}
+        form = AgendamentoForm(initial=initial_data)
+
+    return render(request, 'recepcao/agendar.html', {'form': form, 'paciente': paciente})
 
 
+# =============================
+# LISTA DE AGENDAMENTOS
 # =============================
 # LISTA DE AGENDAMENTOS
 # =============================
@@ -41,11 +48,11 @@ def lista_agendamentos(request):
         agendamentos = agendamentos.filter(data=data_filtro)
         atendimentos_dia = agendamentos.count()
     else:
-        hoje = timezone.localdate()
+        hoje = timezone.now().date()  # <<=== ALTERAÇÃO
         agendamentos_hoje = agendamentos.filter(data=hoje)
         atendimentos_dia = agendamentos_hoje.count()
 
-    today = timezone.localdate()  # para destacar linha do dia atual no template
+    today = timezone.now().date()  # <<=== ALTERAÇÃO
 
     context = {
         'agendamentos': agendamentos,
@@ -54,6 +61,7 @@ def lista_agendamentos(request):
         'today': today,
     }
     return render(request, 'recepcao/lista.html', context)
+
 
 
 # =============================

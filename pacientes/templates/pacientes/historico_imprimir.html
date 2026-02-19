@@ -1,0 +1,89 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<div class="historico-container">
+
+    <!-- Cabeçalho -->
+    <div class="historico-header">
+        <h2>Hospital / Unidade de Saúde</h2>
+        <p>Paciente: {{ paciente.nome }} | Impressão: {{ now|date:"d/m/Y H:i" }}</p>
+        <hr>
+    </div>
+
+    <!-- Histórico -->
+    {% if historico %}
+        {% for item in historico %}
+            <table class="historico-table">
+                <thead>
+                    <tr class="{% if item.tipo == 'triagem' %}triagem{% else %}atendimento{% endif %}">
+                        <th colspan="2">
+                            {% if item.tipo == 'triagem' %}Triagem{% else %}Atendimento Médico{% endif %} - {{ item.data|date:"d/m/Y H:i" }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if item.tipo == 'triagem' %}
+                        <tr><td>Pressão Arterial</td><td>{{ item.obj.pressao_arterial }}</td></tr>
+                        <tr><td>Temperatura</td><td>{{ item.obj.temperatura }} °C</td></tr>
+                        <tr><td>Frequência Cardíaca</td><td>{{ item.obj.frequencia_cardiaca }}</td></tr>
+                        <tr><td>Saturação</td><td>{{ item.obj.saturacao }} %</td></tr>
+                        <tr><td>Classificação de Risco</td><td>{{ item.obj.classificacao_risco }}</td></tr>
+                        {% if item.obj.observacoes %}<tr><td>Observações</td><td>{{ item.obj.observacoes }}</td></tr>{% endif %}
+                        {% if item.obj.enfermeiro %}<tr><td>Enfermeiro</td><td>{{ item.obj.enfermeiro.get_full_name }} | COREN: {{ item.obj.enfermeiro.coren|default:"Não cadastrado" }}</td></tr>{% endif %}
+                        {% if item.obj.tecnico_aplicou %}<tr><td>Técnico</td><td>{{ item.obj.tecnico_aplicou.get_full_name }} | COREN: {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}</td></tr>{% endif %}
+                    {% else %}
+                        {% if item.obj.diagnostico %}<tr><td>Diagnóstico</td><td>{{ item.obj.diagnostico }}</td></tr>{% endif %}
+                        {% if item.obj.prescricao %}<tr><td>Prescrição</td><td>{{ item.obj.prescricao }}</td></tr>{% endif %}
+                        {% if item.obj.observacoes %}<tr><td>Observações</td><td>{{ item.obj.observacoes }}</td></tr>{% endif %}
+                        {% if item.obj.get_decisao_display %}<tr><td>Decisão</td><td>{{ item.obj.get_decisao_display }}</td></tr>{% endif %}
+                        {% if item.obj.medico %}<tr><td>Médico</td><td>{{ item.obj.medico.get_full_name }} | CRM: {{ item.obj.medico.crm|default:"Não cadastrado" }}</td></tr>{% endif %}
+
+                        {% if item.obj.medicacao_aplicada %}
+                            <tr><td>Medicação Aplicada</td>
+                                <td>
+                                    {% if item.obj.tecnico_aplicou %}Técnico: {{ item.obj.tecnico_aplicou.get_full_name }} | COREN: {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}<br>{% endif %}
+                                    {% if item.obj.horario_medicacao %}Horário: {{ item.obj.horario_medicacao|date:"d/m/Y H:i" }}{% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td>Medicação</td><td>Pendente</td></tr>
+                        {% endif %}
+                    {% endif %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% else %}
+        <p>Nenhum histórico encontrado.</p>
+    {% endif %}
+
+    <!-- Rodapé -->
+    <div class="historico-footer">
+        Documento gerado pelo sistema de gestão hospitalar | {{ now|date:"d/m/Y H:i" }}
+    </div>
+</div>
+
+<!-- CSS Ficha Médica -->
+<style>
+.historico-container { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 10px; }
+.historico-header { text-align: center; margin-bottom: 15px; }
+.historico-header hr { border: 0; border-top: 1px solid #999; margin: 5px 0 10px; }
+
+.historico-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; page-break-inside: avoid; }
+.historico-table th { text-align: left; padding: 5px; font-weight: bold; font-size: 13px; color: #fff; }
+.historico-table td { border: 1px solid #ccc; padding: 5px; vertical-align: top; }
+.triagem th { background-color: #3399ff; }
+.atendimento th { background-color: #6c757d; }
+.triagem td { background-color: #e7f3ff; }
+.atendimento td { background-color: #f2f2f2; }
+
+.medication { font-weight: bold; color: green; }
+.historico-footer { text-align: center; font-size: 10px; margin-top: 15px; border-top: 1px solid #999; padding-top: 3px; }
+.no-print { display: none; }
+@media print {
+    .no-print { display: none; }
+    .triagem th, .atendimento th { color: #000 !important; background-color: #eee !important; }
+    .triagem td, .atendimento td { background-color: #fff !important; }
+}
+</style>
+
+{% endblock %}

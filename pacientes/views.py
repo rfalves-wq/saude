@@ -123,3 +123,166 @@ def historico_paciente(request, paciente_id):
         'paciente': paciente,
         'historico': historico,
     })
+from django.shortcuts import render, get_object_or_404
+from triagem.models import Triagem
+from medico.models import Atendimento
+from pacientes.models import Paciente
+from django.shortcuts import render, get_object_or_404
+from pacientes.models import Paciente
+from triagem.models import Triagem
+
+from django.shortcuts import render, get_object_or_404
+from pacientes.models import Paciente
+from triagem.models import Triagem
+from medico.models import Atendimento
+
+def imprimir_historico(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+
+    historico = []
+
+    # ===== Triagens =====
+    triagens = Triagem.objects.filter(paciente=paciente).order_by('-data_triagem')
+    for t in triagens:
+        historico.append({
+            'tipo': 'triagem',
+            'data': t.data_triagem,
+            'obj': t
+        })
+
+    # ===== Atendimentos =====
+    atendimentos = Atendimento.objects.filter(paciente=paciente).order_by('-data_atendimento')
+    for a in atendimentos:
+        historico.append({
+            'tipo': 'atendimento',
+            'data': a.data_atendimento,
+            'obj': a
+        })
+
+    # ===== Ordena tudo por data decrescente =====
+    historico.sort(key=lambda x: x['data'], reverse=True)
+
+    context = {
+        'paciente': paciente,
+        'historico': historico,
+    }
+
+    return render(request, 'pacientes/historico_imprimir.html', context)
+
+
+from django.utils import timezone
+from django.db.models import Q
+
+def imprimir_historico_do_dia(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    hoje = timezone.localdate()  # pega a data de hoje (sem hora)
+
+    historico = []
+
+    # ===== Triagens do dia =====
+    triagens = Triagem.objects.filter(
+        paciente=paciente,
+        data_triagem__date=hoje
+    ).order_by('-data_triagem')
+    for t in triagens:
+        historico.append({
+            'tipo': 'triagem',
+            'data': t.data_triagem,
+            'obj': t
+        })
+
+    # ===== Atendimentos do dia =====
+    atendimentos = Atendimento.objects.filter(
+        paciente=paciente,
+        data_atendimento__date=hoje
+    ).order_by('-data_atendimento')
+    for a in atendimentos:
+        historico.append({
+            'tipo': 'atendimento',
+            'data': a.data_atendimento,
+            'obj': a
+        })
+
+    # Ordena tudo por hora decrescente
+    historico.sort(key=lambda x: x['data'], reverse=True)
+
+    context = {
+        'paciente': paciente,
+        'historico': historico,
+        'data_filtro': hoje,
+    }
+
+    return render(request, 'pacientes/historico_imprimir.html', context)
+
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.http import HttpResponse
+from django.utils import timezone
+from xhtml2pdf import pisa
+
+from pacientes.models import Paciente
+from triagem.models import Triagem
+from medico.models import Atendimento
+
+# ===== PDF Histórico Completo =====
+def imprimir_historico_pdf(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    agora = timezone.localtime()
+
+    historico = []
+
+    triagens = Triagem.objects.filter(paciente=paciente).order_by('-data_triagem')
+    for t in triagens:
+        historico.append({'tipo': 'triagem', 'data': t.data_triagem, 'obj': t})
+
+    atendimentos = Atendimento.objects.filter(paciente=paciente).order_by('-data_atendimento')
+    for a in atendimentos:
+        historico.append({'tipo': 'atendimento', 'data': a.data_atendimento, 'obj': a})
+
+    historico.sort(key=lambda x: x['data'], reverse=True)
+
+    context = {'paciente': paciente, 'historico': historico, 'now': agora}
+    template_path = 'pacientes/historico_imprimir.html'
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="Historico_{paciente.nome}.pdf"'
+
+    template = get_template(template_path)
+    html = template.render(context)
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse("Erro ao gerar PDF")
+    return response
+
+# ===== PDF Histórico do Dia =====
+def imprimir_historico_dia_pdf(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+    agora = timezone.localtime()
+    hoje = agora.date()
+
+    historico = []
+
+    triagens = Triagem.objects.filter(paciente=paciente, data_triagem__date=hoje).order_by('-data_triagem')
+    for t in triagens:
+        historico.append({'tipo': 'triagem', 'data': t.data_triagem, 'obj': t})
+
+    atendimentos = Atendimento.objects.filter(paciente=paciente, data_atendimento__date=hoje).order_by('-data_atendimento')
+    for a in atendimentos:
+        historico.append({'tipo': 'atendimento', 'data': a.data_atendimento, 'obj': a})
+
+    historico.sort(key=lambda x: x['data'], reverse=True)
+
+    context = {'paciente': paciente, 'historico': historico, 'now': agora}
+    template_path = 'pacientes/historico_imprimir.html'
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="Historico_{paciente.nome}_Dia.pdf"'
+
+    template = get_template(template_path)
+    html = template.render(context)
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse("Erro ao gerar PDF")
+    return response

@@ -3,52 +3,61 @@
 {% block title %}Agendar Paciente{% endblock %}
 
 {% block content %}
-
 <div class="row justify-content-center mt-4">
     <div class="col-md-6">
-
         <div class="card shadow">
             <div class="card-body">
-
                 <h4 class="fw-bold text-center mb-4">
                     <i class="bi bi-calendar-plus text-success"></i>
                     Agendar Paciente
                 </h4>
 
-                <!-- MOSTRAR ERROS DO FORMULÁRIO -->
-                {% if errors %}
-                <div class="alert alert-danger">
-                    <ul>
-                        {% for field, error_list in errors.items %}
-                            {% for error in error_list %}
-                                <li>{{ field }}: {{ error }}</li>
-                            {% endfor %}
+                <!-- ===================== -->
+                <!-- ERROS GERAIS DO FORM -->
+                <!-- ===================== -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </div>
                 {% endif %}
 
                 <form method="post" id="formAgendamento">
                     {% csrf_token %}
+                    {{ form.paciente }}  <!-- campo oculto -->
 
                     <!-- BUSCA PACIENTE -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Buscar Paciente</label>
                         <input type="text" id="buscaPaciente" class="form-control" placeholder="Digite nome, CPF ou data nascimento">
                         <div id="resultadoBusca" class="list-group mt-2"></div>
-                        {{ form.paciente }}  <!-- campo oculto -->
                     </div>
 
-                    <!-- DATA (TRAVADA) -->
+                    <!-- DATA -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Data</label>
                         {{ form.data }}
+                        {% if form.data.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.data.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
-                    <!-- HORA (TRAVADA) -->
+                    <!-- HORA -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Hora</label>
                         {{ form.hora }}
+                        {% if form.hora.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.hora.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="d-flex justify-content-between">
@@ -62,10 +71,8 @@
                     </div>
 
                 </form>
-
             </div>
         </div>
-
     </div>
 </div>
 
@@ -81,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const dia = String(hoje.getDate()).padStart(2, '0');
         const mes = String(hoje.getMonth() + 1).padStart(2, '0');
         const ano = hoje.getFullYear();
-        inputData.value = `${ano}-${mes}-${dia}`; // formato yyyy-mm-dd
+        inputData.value = `${ano}-${mes}-${dia}`;
     }
     if (inputData) inputData.readOnly = true;
 
@@ -93,12 +100,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const agora = new Date();
         const horas = String(agora.getHours()).padStart(2, '0');
         const minutos = String(agora.getMinutes()).padStart(2, '0');
-        inputHora.value = `${horas}:${minutos}`; // formato HH:MM
+        inputHora.value = `${horas}:${minutos}`;
     }
     if (inputHora) inputHora.readOnly = true;
 
     // ===========================
-    // AUTOCOMPLETE PACIENTE COM DESTAQUE
+    // AUTOCOMPLETE PACIENTE
     // ===========================
     const input = document.getElementById("buscaPaciente");
     const resultado = document.getElementById("resultadoBusca");
@@ -106,7 +113,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     input.addEventListener("keyup", function() {
         let query = this.value.trim();
-
         if (query.length < 2) {
             resultado.innerHTML = "";
             return;
@@ -116,21 +122,17 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(response => response.json())
             .then(data => {
                 resultado.innerHTML = "";
-
                 data.forEach(paciente => {
                     let item = document.createElement("a");
                     item.classList.add("list-group-item", "list-group-item-action");
                     item.style.cursor = "pointer";
 
-                    // Função para destacar o termo digitado
                     function highlight(text, term) {
                         const regex = new RegExp(`(${term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, "gi");
                         return text.replace(regex, "<strong>$1</strong>");
                     }
 
-                    // Exibe nome, CPF e nascimento com destaque
                     item.innerHTML = `${highlight(paciente.nome, query)} | CPF: ${highlight(paciente.cpf, query)} | Nasc: ${highlight(paciente.data_nascimento, query)}`;
-
                     item.onclick = function() {
                         input.value = paciente.nome;
                         hiddenPaciente.value = paciente.id;
@@ -143,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // ===========================
-    // EVITAR MÚLTIPLOS CLIQUES NO BOTÃO
+    // EVITAR CLIQUES DUPLOS
     // ===========================
     const form = document.getElementById("formAgendamento");
     const btn = document.getElementById("btnSubmit");
@@ -154,5 +156,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 </script>
-
 {% endblock %}

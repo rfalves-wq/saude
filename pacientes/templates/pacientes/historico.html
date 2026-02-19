@@ -1,103 +1,143 @@
 {% extends 'usuarios/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>📋 Histórico do Paciente</h2>
-    <h4>{{ paciente.nome }}</h4>
-    <hr>
+<div class="pdf-container">
 
+    <!-- Cabeçalho -->
+    <div class="pdf-header text-center mb-4 p-3" style="background-color:#f0f2f5; border-radius:8px;">
+        <img src="#" alt="Logo Hospital" style="height:60px; margin-bottom:10px;">
+        <h2 style="margin:0;">Hospital / Unidade de Saúde</h2>
+        <small>Paciente: {{ paciente.nome }} | Impressão: {{ now|date:"d/m/Y H:i" }}</small>
+    </div>
+
+    <!-- Botões PDF -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'imprimir_historico_pdf' paciente.id %}" target="_blank" class="btn btn-success me-2">
+            🖨️ PDF Histórico Completo
+        </a>
+        <a href="{% url 'imprimir_historico_dia_pdf' paciente.id %}" target="_blank" class="btn btn-warning">
+            🖨️ PDF Histórico do Dia
+        </a>
+    </div>
+
+    <!-- Histórico -->
     {% if historico %}
         {% for item in historico %}
-            <div class="card shadow-sm mb-3">
-                <div class="card-body">
+            <div class="history-section {% if item.tipo == 'triagem' %}triagem{% else %}atendimento{% endif %}">
 
-                    <h5>
-                        {% if item.tipo == 'triagem' %}
-                            🩺 Triagem
-                        {% else %}
-                            👨‍⚕️ Atendimento Médico
-                        {% endif %}
-                    </h5>
+                <!-- Cabeçalho da seção -->
+                <div class="section-header">
+                    <div>
+                        {% if item.tipo == 'triagem' %}🩺 Triagem{% else %}👨‍⚕️ Atendimento Médico{% endif %}
+                    </div>
+                    <div>{{ item.data|date:"d/m/Y H:i" }}</div>
+                </div>
 
-                    <p><strong>Data:</strong> {{ item.data|date:"d/m/Y H:i" }}</p>
-
+                <!-- Corpo -->
+                <div class="section-body">
                     {% if item.tipo == 'triagem' %}
-                        <hr>
-                        <p><strong>Pressão Arterial:</strong> {{ item.obj.pressao_arterial }}</p>
-                        <p><strong>Temperatura:</strong> {{ item.obj.temperatura }} °C</p>
-                        <p><strong>Frequência Cardíaca:</strong> {{ item.obj.frequencia_cardiaca }}</p>
-                        <p><strong>Saturação:</strong> {{ item.obj.saturacao }} %</p>
-                        <p><strong>Classificação de Risco:</strong> {{ item.obj.classificacao_risco }}</p>
-
-                        {% if item.obj.observacoes %}
-                            <p><strong>Observações:</strong><br>{{ item.obj.observacoes }}</p>
-                        {% endif %}
-
-                        {% if item.obj.enfermeiro or item.obj.tecnico_aplicou %}
-                            <hr>
-                            {% if item.obj.enfermeiro %}
-                                <p><strong>Enfermeiro:</strong> {{ item.obj.enfermeiro.get_full_name }}</p>
-                                <p><strong>COREN:</strong> {{ item.obj.enfermeiro.coren|default:"Não cadastrado" }}</p>
-                            {% endif %}
-
-                            {% if item.obj.tecnico_aplicou %}
-                                <p><strong>Técnico:</strong> {{ item.obj.tecnico_aplicou.get_full_name }}</p>
-                                <p><strong>COREN:</strong> {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}</p>
-                            {% endif %}
-                        {% endif %}
+                        <!-- Tabela de sinais vitais -->
+                        <table class="table table-sm table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Pressão Arterial</th><td>{{ item.obj.pressao_arterial }}</td>
+                                    <th>Temperatura (°C)</th><td>{{ item.obj.temperatura }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Frequência Cardíaca</th><td>{{ item.obj.frequencia_cardiaca }}</td>
+                                    <th>Saturação (%)</th><td>{{ item.obj.saturacao }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Classificação de Risco</th><td colspan="3">{{ item.obj.classificacao_risco }}</td>
+                                </tr>
+                                {% if item.obj.observacoes %}
+                                <tr>
+                                    <th>Observações</th><td colspan="3">{{ item.obj.observacoes }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if item.obj.enfermeiro or item.obj.tecnico_aplicou %}
+                                <tr>
+                                    <th>Profissionais</th>
+                                    <td colspan="3">
+                                        {% if item.obj.enfermeiro %}
+                                            Enfermeiro: {{ item.obj.enfermeiro.get_full_name }} | COREN: {{ item.obj.enfermeiro.coren|default:"Não cadastrado" }}<br>
+                                        {% endif %}
+                                        {% if item.obj.tecnico_aplicou %}
+                                            Técnico: {{ item.obj.tecnico_aplicou.get_full_name }} | COREN: {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
 
                     {% else %}
-                        <hr>
-                        {% if item.obj.diagnostico %}
-                            <p><strong>Diagnóstico:</strong><br>{{ item.obj.diagnostico }}</p>
-                        {% endif %}
-
-                        {% if item.obj.prescricao %}
-                            <p><strong>Prescrição:</strong><br>{{ item.obj.prescricao }}</p>
-                        {% endif %}
-
-                        {% if item.obj.observacoes %}
-                            <p><strong>Observações:</strong><br>{{ item.obj.observacoes }}</p>
-                        {% endif %}
-
-                        {% if item.obj.get_decisao_display %}
-                            <p><strong>Decisão:</strong> {{ item.obj.get_decisao_display }}</p>
-                        {% endif %}
-
-                        <hr>
-                        {% if item.obj.medico %}
-                            <p><strong>Médico:</strong> {{ item.obj.medico.get_full_name }}</p>
-                            <p><strong>CRM:</strong> {{ item.obj.medico.crm|default:"Não cadastrado" }}</p>
-                        {% endif %}
+                        {% if item.obj.diagnostico %}<p><strong>Diagnóstico:</strong> {{ item.obj.diagnostico }}</p>{% endif %}
+                        {% if item.obj.prescricao %}<p><strong>Prescrição:</strong> {{ item.obj.prescricao }}</p>{% endif %}
+                        {% if item.obj.observacoes %}<p><strong>Observações:</strong> {{ item.obj.observacoes }}</p>{% endif %}
+                        {% if item.obj.get_decisao_display %}<p><strong>Decisão:</strong> {{ item.obj.get_decisao_display }}</p>{% endif %}
+                        {% if item.obj.medico %}<p><strong>Médico:</strong> {{ item.obj.medico.get_full_name }} | CRM: {{ item.obj.medico.crm|default:"Não cadastrado" }}</p>{% endif %}
 
                         {% if item.obj.medicacao_aplicada %}
-                            <hr>
-                            <span class="badge bg-success">💉 Medicação Aplicada</span>
-
-                            {% if item.obj.tecnico_aplicou %}
-                                <div class="mt-2">
-                                    <p><strong>Técnico:</strong> {{ item.obj.tecnico_aplicou.get_full_name }}</p>
-                                    <p><strong>COREN:</strong> {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}</p>
-                                </div>
-                            {% else %}
-                                <p><em>Técnico não registrado</em></p>
-                            {% endif %}
-
-                            {% if item.obj.horario_medicacao %}
-                                <p><strong>Horário da Aplicação:</strong> {{ item.obj.horario_medicacao|date:"d/m/Y H:i" }}</p>
-                            {% endif %}
+                            <div class="alert alert-success p-2">
+                                💉 Medicação Aplicada<br>
+                                {% if item.obj.tecnico_aplicou %}
+                                    Técnico: {{ item.obj.tecnico_aplicou.get_full_name }} | COREN: {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}<br>
+                                {% endif %}
+                                {% if item.obj.horario_medicacao %}
+                                    Horário da Aplicação: {{ item.obj.horario_medicacao|date:"d/m/Y H:i" }}
+                                {% endif %}
+                            </div>
                         {% else %}
-                            <span class="badge bg-warning text-dark">Medicação Pendente</span>
+                            <span class="badge badge-warning">Medicação Pendente</span>
                         {% endif %}
                     {% endif %}
-
                 </div>
             </div>
         {% endfor %}
     {% else %}
-        <div class="alert alert-info">
-            Nenhum histórico encontrado.
-        </div>
+        <div class="alert alert-info">Nenhum histórico encontrado.</div>
     {% endif %}
+
+    <!-- Rodapé -->
+    <div class="pdf-footer">
+        Documento gerado pelo sistema de gestão hospitalar | {{ now|date:"d/m/Y H:i" }}
+    </div>
 </div>
+
+<!-- CSS Customizado -->
+<style>
+.pdf-container {
+    font-family: "Arial", sans-serif;
+    font-size: 13px;
+    color: #333;
+    padding: 20px;
+    background-color: #f5f6fa;
+}
+.history-section {
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.section-header {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #fff;
+    font-size: 0.95em;
+}
+.triagem .section-header { background-color: #3399ff; }
+.atendimento .section-header { background-color: #6c757d; }
+.section-body { background-color: #ffffff; padding: 12px 15px; line-height: 1.5; }
+.table { margin-bottom:0; }
+.table th { background-color:#f1f3f5; width:25%; }
+.row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:5px; }
+.row > div { flex:1 1 180px; }
+.medication { color:#155724; font-weight:bold; }
+.badge-warning { background-color:#ffc107; color:#212529; padding:2px 6px; border-radius:3px; font-weight:bold; }
+.pdf-footer { text-align:center; font-size:10px; color:#555; margin-top:25px; border-top:1px solid #ccc; padding-top:5px; }
+</style>
 {% endblock %}
