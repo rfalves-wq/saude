@@ -1,0 +1,103 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>📋 Histórico do Paciente</h2>
+    <h4>{{ paciente.nome }}</h4>
+    <hr>
+
+    {% if historico %}
+        {% for item in historico %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+
+                    <h5>
+                        {% if item.tipo == 'triagem' %}
+                            🩺 Triagem
+                        {% else %}
+                            👨‍⚕️ Atendimento Médico
+                        {% endif %}
+                    </h5>
+
+                    <p><strong>Data:</strong> {{ item.data|date:"d/m/Y H:i" }}</p>
+
+                    {% if item.tipo == 'triagem' %}
+                        <hr>
+                        <p><strong>Pressão Arterial:</strong> {{ item.obj.pressao_arterial }}</p>
+                        <p><strong>Temperatura:</strong> {{ item.obj.temperatura }} °C</p>
+                        <p><strong>Frequência Cardíaca:</strong> {{ item.obj.frequencia_cardiaca }}</p>
+                        <p><strong>Saturação:</strong> {{ item.obj.saturacao }} %</p>
+                        <p><strong>Classificação de Risco:</strong> {{ item.obj.classificacao_risco }}</p>
+
+                        {% if item.obj.observacoes %}
+                            <p><strong>Observações:</strong><br>{{ item.obj.observacoes }}</p>
+                        {% endif %}
+
+                        {% if item.obj.enfermeiro or item.obj.tecnico_aplicou %}
+                            <hr>
+                            {% if item.obj.enfermeiro %}
+                                <p><strong>Enfermeiro:</strong> {{ item.obj.enfermeiro.get_full_name }}</p>
+                                <p><strong>COREN:</strong> {{ item.obj.enfermeiro.coren|default:"Não cadastrado" }}</p>
+                            {% endif %}
+
+                            {% if item.obj.tecnico_aplicou %}
+                                <p><strong>Técnico:</strong> {{ item.obj.tecnico_aplicou.get_full_name }}</p>
+                                <p><strong>COREN:</strong> {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}</p>
+                            {% endif %}
+                        {% endif %}
+
+                    {% else %}
+                        <hr>
+                        {% if item.obj.diagnostico %}
+                            <p><strong>Diagnóstico:</strong><br>{{ item.obj.diagnostico }}</p>
+                        {% endif %}
+
+                        {% if item.obj.prescricao %}
+                            <p><strong>Prescrição:</strong><br>{{ item.obj.prescricao }}</p>
+                        {% endif %}
+
+                        {% if item.obj.observacoes %}
+                            <p><strong>Observações:</strong><br>{{ item.obj.observacoes }}</p>
+                        {% endif %}
+
+                        {% if item.obj.get_decisao_display %}
+                            <p><strong>Decisão:</strong> {{ item.obj.get_decisao_display }}</p>
+                        {% endif %}
+
+                        <hr>
+                        {% if item.obj.medico %}
+                            <p><strong>Médico:</strong> {{ item.obj.medico.get_full_name }}</p>
+                            <p><strong>CRM:</strong> {{ item.obj.medico.crm|default:"Não cadastrado" }}</p>
+                        {% endif %}
+
+                        {% if item.obj.medicacao_aplicada %}
+                            <hr>
+                            <span class="badge bg-success">💉 Medicação Aplicada</span>
+
+                            {% if item.obj.tecnico_aplicou %}
+                                <div class="mt-2">
+                                    <p><strong>Técnico:</strong> {{ item.obj.tecnico_aplicou.get_full_name }}</p>
+                                    <p><strong>COREN:</strong> {{ item.obj.tecnico_aplicou.coren|default:"Não cadastrado" }}</p>
+                                </div>
+                            {% else %}
+                                <p><em>Técnico não registrado</em></p>
+                            {% endif %}
+
+                            {% if item.obj.horario_medicacao %}
+                                <p><strong>Horário da Aplicação:</strong> {{ item.obj.horario_medicacao|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Medicação Pendente</span>
+                        {% endif %}
+                    {% endif %}
+
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            Nenhum histórico encontrado.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

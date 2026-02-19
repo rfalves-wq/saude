@@ -1,12 +1,28 @@
 from django.db import models
+from django.utils import timezone
 from pacientes.models import Paciente
 from usuarios.models import Usuario
 from triagem.models import Triagem
 
+
 class Atendimento(models.Model):
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    medico = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    triagem = models.OneToOneField(Triagem, on_delete=models.CASCADE)
+
+    paciente = models.ForeignKey(
+        Paciente,
+        on_delete=models.CASCADE
+    )
+
+    medico = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,  # ⚠ Melhor que CASCADE
+        null=True,
+        related_name="atendimentos_realizados"
+    )
+
+    triagem = models.OneToOneField(
+        Triagem,
+        on_delete=models.CASCADE
+    )
 
     diagnostico = models.TextField(blank=True, null=True)
     prescricao = models.TextField(blank=True, null=True)
@@ -25,7 +41,10 @@ class Atendimento(models.Model):
         null=True
     )
 
-    # 🔵 CONTROLE DA MEDICAÇÃO
+    # ==============================
+    # CONTROLE DA MEDICAÇÃO
+    # ==============================
+
     medicacao_aplicada = models.BooleanField(default=False)
 
     tecnico_aplicou = models.ForeignKey(
@@ -36,10 +55,27 @@ class Atendimento(models.Model):
         related_name="medicacoes_aplicadas"
     )
 
-    horario_medicacao = models.DateTimeField(null=True, blank=True)
+    horario_medicacao = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    # ==============================
+    # CONTROLE DO ATENDIMENTO
+    # ==============================
 
     data_atendimento = models.DateTimeField(auto_now_add=True)
     finalizado = models.BooleanField(default=False)
 
+    # ==============================
+    # MÉTODO PARA APLICAR MEDICAÇÃO
+    # ==============================
+
+    def aplicar_medicacao(self, tecnico):
+        self.medicacao_aplicada = True
+        self.tecnico_aplicou = tecnico
+        self.horario_medicacao = timezone.now()
+        self.save()
+
     def __str__(self):
-        return f"{self.paciente.nome} - {self.data_atendimento}"
+        return f"{self.paciente.nome} - {self.data_atendimento.strftime('%d/%m/%Y %H:%M')}"

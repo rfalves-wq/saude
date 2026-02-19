@@ -19,7 +19,7 @@ class Medicacao(models.Model):
     administrado = models.BooleanField(default=False)
     horario_administracao = models.TimeField(null=True, blank=True)
     observacao = models.TextField(blank=True, null=True)
-    crm = models.CharField(max_length=20, blank=True, null=True)
+    coren = models.CharField(max_length=20, blank=True, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

@@ -78,3 +78,48 @@ def paciente_delete(request, pk):
         return redirect('paciente_list')
 
     return render(request, 'pacientes/paciente_confirm_delete.html', {'paciente': paciente})
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Paciente
+from triagem.models import Triagem
+from medico.models import Atendimento
+from itertools import chain
+from operator import attrgetter
+
+@login_required
+def historico_paciente(request, paciente_id):
+    paciente = get_object_or_404(Paciente, id=paciente_id)
+
+    triagens = Triagem.objects.filter(
+        paciente=paciente
+    )
+
+    atendimentos = Atendimento.objects.filter(
+        paciente=paciente
+    )
+
+    # 🔹 Criando lista unificada
+    historico = []
+
+    for t in triagens:
+        historico.append({
+            'tipo': 'triagem',
+            'data': t.data_triagem,
+            'obj': t
+        })
+
+    for a in atendimentos:
+        historico.append({
+            'tipo': 'atendimento',
+            'data': a.data_atendimento,  # ajuste se o nome for diferente
+            'obj': a
+        })
+
+    # 🔹 Ordena por data (mais recente primeiro)
+    historico.sort(key=lambda x: x['data'], reverse=True)
+
+    return render(request, 'pacientes/historico.html', {
+        'paciente': paciente,
+        'historico': historico,
+    })

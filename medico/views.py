@@ -201,3 +201,19 @@ def decidir_atendimento(request, atendimento_id):
     return render(request, "medico/decidir_atendimento.html", {
         "atendimento": atendimento
     })
+
+
+@login_required
+def aplicar_medicacao(request, atendimento_id):
+    atendimento = get_object_or_404(Atendimento, id=atendimento_id)
+
+    # segurança: apenas técnico pode aplicar
+    if request.user.perfil != "tecnico":
+        return redirect("dashboard")
+
+    # aplica medicação corretamente
+    atendimento.aplicar_medicacao(request.user)
+
+    return redirect("tecnico_dashboard")
+
+

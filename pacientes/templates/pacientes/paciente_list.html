@@ -77,17 +77,31 @@
                     <td>{{ paciente.email|default:"-" }}</td>
 
                     <td class="text-center">
+
+                        <!-- Editar -->
                         <a href="{% url 'paciente_update' paciente.id %}"
-                           class="btn btn-sm btn-warning me-1">
+                           class="btn btn-sm btn-warning me-1"
+                           title="Editar">
                             ✏️
                         </a>
 
+                        <!-- Excluir -->
                         <a href="{% url 'paciente_delete' paciente.id %}"
-                           class="btn btn-sm btn-danger">
+                           class="btn btn-sm btn-danger me-1"
+                           title="Excluir">
                             🗑️
                         </a>
+
+                        <!-- Histórico -->
+                        <a href="{% url 'historico_paciente' paciente.id %}"
+                           class="btn btn-sm btn-info"
+                           title="Histórico do Paciente">
+                            <i class="bi bi-clock-history"></i>
+                        </a>
+
                     </td>
                 </tr>
+
                 {% empty %}
                 <tr>
                     <td colspan="5" class="text-center">
