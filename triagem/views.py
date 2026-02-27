@@ -277,3 +277,4 @@ def triagens_por_dia(request):
     }
 
     return render(request, 'triagem/triagens_por_dia.html', context)
+

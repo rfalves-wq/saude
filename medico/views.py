@@ -47,10 +47,17 @@ def medico_dashboard(request):
     )
 
     # ✅ ATENDIMENTOS FINALIZADOS DO MÉDICO LOGADO
+    #atendimentos_finalizados = Atendimento.objects.filter(
+    #    medico=request.user,
+    #    finalizado=True
+    #).order_by("-id")
+
+# ✅ ATENDIMENTOS FINALIZADOS SOMENTE HOJE
     atendimentos_finalizados = Atendimento.objects.filter(
-        medico=request.user,
-        finalizado=True
-    ).order_by("-id")
+    medico=request.user,
+    finalizado=True,
+    data_atendimento__date=hoje
+    ).order_by("-data_atendimento")
 
     # 🟡 Aguardando técnico aplicar medicação
     aguardando_medicacao = Atendimento.objects.filter(
