@@ -32,6 +32,7 @@ class Atendimento(models.Model):
         ("dispensar", "Dispensar"),
         ("medicacao", "Medicação"),
         ("internacao", "Internação"),
+        ("exames", "Exames"),
     ]
 
     decisao = models.CharField(
