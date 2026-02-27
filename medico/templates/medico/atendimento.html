@@ -1,23 +1,74 @@
 {% extends 'usuarios/base.html' %}
 {% block content %}
 
+<h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
 <p><strong>Médico logado:</strong> {{ request.user.get_full_name }}</p>
 
-<h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
+<hr>
 
 {% if medicacoes_dia %}
-    <div class="alert alert-info">
-        <strong>Medicações já prescritas hoje:</strong>
-        <ul>
-            {% for prescricao, medico, hora in medicacoes_dia %}
-                <li>{{ prescricao }} — <em>{{ medico }}</em> às {{ hora|time:"H:i" }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+<div class="alert alert-info">
+    <strong>Medicações já prescritas hoje:</strong>
+    <ul>
+        {% for prescricao, medico, hora in medicacoes_dia %}
+            <li>{{ prescricao }} — <em>{{ medico }}</em> às {{ hora|time:"H:i" }}</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endif %}
 
-<form method="post">
+<hr>
+
+<h4>🧪 Solicitar Exame</h4>
+<form method="POST">
     {% csrf_token %}
+    <input type="hidden" name="acao" value="novo_exame">
+
+    <select name="tipo_exame" class="form-select mb-2" required>
+        <option value="">-- Tipo do exame --</option>
+        <option value="laboratorio">Laboratório</option>
+        <option value="radiologia">Radiologia</option>
+    </select>
+
+    <input type="text"
+           name="nome_exame"
+           placeholder="Ex: Hemograma, RX Tórax"
+           class="form-control mb-2"
+           required>
+
+    <button type="submit" class="btn btn-primary">Solicitar</button>
+</form>
+
+<hr>
+
+<h5>🧪 Laboratório</h5>
+<ul>
+    {% for exame in exames %}
+        {% if exame.tipo == "laboratorio" %}
+            <li>{{ exame.nome }} - <strong>{{ exame.status }}</strong></li>
+        {% endif %}
+    {% empty %}
+        <li>Nenhum exame.</li>
+    {% endfor %}
+</ul>
+
+<h5>🩻 Radiologia</h5>
+<ul>
+    {% for exame in exames %}
+        {% if exame.tipo == "radiologia" %}
+            <li>{{ exame.nome }} - <strong>{{ exame.status }}</strong></li>
+        {% endif %}
+    {% empty %}
+        <li>Nenhum exame.</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<h4>📝 Salvar Atendimento</h4>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="salvar_atendimento">
 
     <div class="mb-3">
         <label>Diagnóstico</label>
@@ -38,25 +89,13 @@
         <label>Decisão</label>
         <select name="decisao" class="form-select" required>
             <option value="">-- Selecione --</option>
-
-            <option value="dispensar"
-                {% if atendimento.decisao == "dispensar" %}selected{% endif %}>
-                Dispensar
-            </option>
-
-            <option value="medicacao"
-                {% if atendimento.decisao == "medicacao" %}selected{% endif %}>
-                Medicação
-            </option>
-
-            <option value="internacao"
-                {% if atendimento.decisao == "internacao" %}selected{% endif %}>
-                Internação
-            </option>
+            <option value="dispensar" {% if atendimento.decisao == "dispensar" %}selected{% endif %}>Dispensar</option>
+            <option value="medicacao" {% if atendimento.decisao == "medicacao" %}selected{% endif %}>Medicação</option>
+            <option value="internacao" {% if atendimento.decisao == "internacao" %}selected{% endif %}>Internação</option>
         </select>
     </div>
 
-    <button type="submit" class="btn btn-success">Salvar</button>
+    <button type="submit" class="btn btn-success">Salvar Atendimento</button>
 </form>
 
 {% endblock %}

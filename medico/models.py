@@ -80,3 +80,39 @@ class Atendimento(models.Model):
 
     def __str__(self):
         return f"{self.paciente.nome} - {self.data_atendimento.strftime('%d/%m/%Y %H:%M')}"
+class Exame(models.Model):
+
+    TIPO_CHOICES = [
+        ("laboratorio", "Laboratório"),
+        ("radiologia", "Radiologia"),
+    ]
+
+    atendimento = models.ForeignKey(
+        "Atendimento",
+        on_delete=models.CASCADE,
+        related_name="exames"
+    )
+
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES,
+        default="laboratorio"
+    )
+
+    nome = models.CharField(max_length=150)
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("solicitado", "Solicitado"),
+            ("pronto", "Pronto"),
+        ],
+        default="solicitado"
+    )
+
+    resultado = models.TextField(blank=True, null=True)
+
+    data_solicitacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nome} - {self.get_tipo_display()}"

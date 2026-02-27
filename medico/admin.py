@@ -24,3 +24,7 @@ class AtendimentoAdmin(admin.ModelAdmin):
     ordering = ('-data_atendimento',)
 
     readonly_fields = ('data_atendimento',)
+    
+    from .models import Exame
+
+    admin.site.register(Exame)

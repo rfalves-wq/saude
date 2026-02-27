@@ -7,7 +7,7 @@ from django.db import transaction
 from .models import Atendimento
 from triagem.models import Triagem
 
-
+from .models import Atendimento, Exame
 # ==============================
 # DASHBOARD MÉDICO
 # ==============================
@@ -127,36 +127,59 @@ def editar_atendimento(request, atendimento_id):
         if a.prescricao and a.prescricao.strip()
     ]
 
+    exames = atendimento.exames.all()
+
     if request.method == "POST":
-        decisao = request.POST.get("decisao")
+        acao = request.POST.get("acao")
 
-        atendimento.decisao = decisao
-        atendimento.diagnostico = request.POST.get("diagnostico")
-        atendimento.prescricao = request.POST.get("prescricao")
-        atendimento.observacoes = request.POST.get("observacoes")
+        # ==========================
+        # 1️⃣ Solicitar novo exame
+        # ==========================
+        if acao == "novo_exame":
+            nome_exame = request.POST.get("nome_exame")
+            tipo_exame = request.POST.get("tipo_exame")
 
-        if decisao == "dispensar":
-            atendimento.finalizado = True
+            if nome_exame and tipo_exame:
+                Exame.objects.create(
+                    atendimento=atendimento,
+                    nome=nome_exame,
+                    tipo=tipo_exame
+                )
 
-        elif decisao == "medicacao":
-            atendimento.finalizado = False
-            atendimento.medicacao_aplicada = False
-            atendimento.tecnico_aplicou = None
-            atendimento.horario_medicacao = None
+            return redirect("editar_atendimento", atendimento.id)
 
-        elif decisao == "internacao":
-            atendimento.finalizado = False
+        # ==========================
+        # 2️⃣ Salvar atendimento
+        # ==========================
+        elif acao == "salvar_atendimento":
+            decisao = request.POST.get("decisao")
+            if not decisao:
+                return redirect("editar_atendimento", atendimento.id)
 
-        atendimento.save()
-        return redirect("medico_dashboard")
+            atendimento.decisao = decisao
+            atendimento.diagnostico = request.POST.get("diagnostico")
+            atendimento.prescricao = request.POST.get("prescricao")
+            atendimento.observacoes = request.POST.get("observacoes")
+
+            if decisao == "dispensar":
+                atendimento.finalizado = True
+            elif decisao == "medicacao":
+                atendimento.finalizado = False
+                atendimento.medicacao_aplicada = False
+                atendimento.tecnico_aplicou = None
+                atendimento.horario_medicacao = None
+            elif decisao == "internacao":
+                atendimento.finalizado = False
+
+            atendimento.save()
+            return redirect("medico_dashboard")
 
     return render(request, "medico/atendimento.html", {
         "atendimento": atendimento,
         "medicacoes_dia": medicacoes_dia,
         "atendimentos_hoje": atendimentos_hoje,
+        "exames": exames,
     })
-
-
 # ==============================
 # DECIDIR ATENDIMENTO
 # ==============================
@@ -187,3 +210,5 @@ def aplicar_medicacao(request, atendimento_id):
 
     atendimento.aplicar_medicacao(request.user)
     return redirect("tecnico_dashboard")
+
+

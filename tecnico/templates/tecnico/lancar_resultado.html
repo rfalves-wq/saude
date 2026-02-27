@@ -1,0 +1,20 @@
+{% extends 'usuarios/base.html' %}
+{% block content %}
+
+<h2>Lançar Resultado - {{ exame.nome }}</h2>
+
+<p><strong>Paciente:</strong> {{ exame.atendimento.paciente.nome }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label>Resultado</label>
+        <textarea name="resultado" class="form-control" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Salvar Resultado
+    </button>
+</form>
+
+{% endblock %}
