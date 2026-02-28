@@ -4,37 +4,25 @@
 
 {% block content %}
 
-<!-- USUÁRIO LOGADO FIXO NO TOPO DIREITO -->
-<div class="usuario-topo d-flex align-items-center p-2 shadow-sm bg-white rounded">
-    {% now "H" as hora_atual %}
-    <span class="text-muted me-2">
-        {% if hora_atual < "12" %}
-            Bom dia
-        {% elif hora_atual < "18" %}
-            Boa tarde
-        {% else %}
-            Boa noite
-        {% endif %},
-        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-    </span>
-    <i class="bi bi-person-circle fs-4"></i>
-</div>
-
 <div class="container mt-4">
+
     <!-- TÍTULO -->
     <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
     <!-- CARDS PRINCIPAIS -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-primary text-center">
+        <!-- Triagens Pendentes -->
+        <div class="col-md-3 mb-2">
+            <div class="card shadow-sm border-danger text-center">
                 <div class="card-body">
                     <h6>Triagens Pendentes</h6>
-                    <h3 class="text-primary">{{ total_pendentes }}</h3>
+                    <h3 class="text-danger">{{ total_pendentes }}</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <!-- Atendimentos Finalizados -->
+        <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-success text-center">
                 <div class="card-body">
                     <h6>Atendimentos Finalizados</h6>
@@ -42,7 +30,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <!-- Atendimentos Hoje -->
+        <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-info text-center">
                 <div class="card-body">
                     <h6>Atendimentos Hoje</h6>
@@ -50,7 +40,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <!-- Atendimentos no Mês -->
+        <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-dark text-center">
                 <div class="card-body">
                     <h6>Atendimentos no Mês</h6>
@@ -62,9 +54,9 @@
 
     <!-- TRIAGENS PENDENTES -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white">Triagens Aguardando Atendimento</div>
+        <div class="card-header bg-danger text-white">Triagens Aguardando Atendimento</div>
         <div class="card-body">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -94,7 +86,6 @@
                         <td>
                             <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
                         </td>
-                        
                     </tr>
                     {% empty %}
                     <tr>
@@ -110,7 +101,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-warning text-dark">Pacientes em Medicação / Internação</div>
         <div class="card-body">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -155,49 +146,39 @@
         </div>
     </div>
 
-   <!-- ATENDIMENTOS FINALIZADOS -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-success text-white">Atendimentos Finalizados</div>
-    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Paciente</th>
-                    <th>Prescrição</th>
-                    <th>Data Atendimento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for a in atendimentos_finalizados %}
-                <tr>
-                    <td>{{ a.paciente.nome }}</td>
-                    <td>{{ a.prescricao|default:"-" }}</td>
-                    <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- ATENDIMENTOS FINALIZADOS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">Atendimentos Finalizados</div>
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Prescrição</th>
+                        <th>Data Atendimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in atendimentos_finalizados %}
+                    <tr>
+                        <td>{{ a.paciente.nome }}</td>
+                        <td>{{ a.prescricao|default:"-" }}</td>
+                        <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 </div>
 
 <!-- ESTILOS -->
 <style>
-.usuario-topo {
-    position: fixed;
-    top: 10px;
-    right: 20px;
-    z-index: 1000;
-    background-color: white;
-    border-radius: 5px;
-    padding: 5px 10px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
-}
 .alerta-vermelho {
     animation: piscar 0.8s infinite;
     font-weight: bold;

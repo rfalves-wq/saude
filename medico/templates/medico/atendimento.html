@@ -20,48 +20,84 @@
 <hr>
 
 <h4>🧪 Solicitar Exame</h4>
-<form method="POST">
+<form method="POST" class="mb-4">
     {% csrf_token %}
     <input type="hidden" name="acao" value="novo_exame">
 
-    <select name="tipo_exame" class="form-select mb-2" required>
-        <option value="">-- Tipo do exame --</option>
-        <option value="laboratorio">Laboratório</option>
-        <option value="radiologia">Radiologia</option>
-    </select>
-
-    <input type="text"
-           name="nome_exame"
-           placeholder="Ex: Hemograma, RX Tórax"
-           class="form-control mb-2"
-           required>
-
-    <button type="submit" class="btn btn-primary">Solicitar</button>
+    <div class="row mb-2">
+        <div class="col-md-4">
+            <select name="tipo_exame" class="form-select" required>
+                <option value="">-- Tipo do exame --</option>
+                <option value="laboratorio">Laboratório</option>
+                <option value="radiologia">Radiologia</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <input type="text" name="nome_exame" placeholder="Ex: Hemograma, RX Tórax" class="form-control" required>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Solicitar</button>
+        </div>
+    </div>
 </form>
 
 <hr>
 
-<h5>🧪 Laboratório</h5>
-<ul>
-    {% for exame in exames %}
-        {% if exame.tipo == "laboratorio" %}
-            <li>{{ exame.nome }} - <strong>{{ exame.status }}</strong></li>
-        {% endif %}
-    {% empty %}
-        <li>Nenhum exame.</li>
-    {% endfor %}
-</ul>
+<div class="row">
+    <!-- Laboratório -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">🧪 Laboratório</div>
+            <div class="card-body">
+                {% if exames %}
+                <ul class="list-group">
+                    {% for exame in exames %}
+                        {% if exame.tipo == "laboratorio" %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ exame.nome }}
+                            {% if exame.status == "pronto" %}
+                                <span class="badge bg-success">{{ exame.status|capfirst }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ exame.status|capfirst }}</span>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <p class="text-muted">Nenhum exame solicitado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-<h5>🩻 Radiologia</h5>
-<ul>
-    {% for exame in exames %}
-        {% if exame.tipo == "radiologia" %}
-            <li>{{ exame.nome }} - <strong>{{ exame.status }}</strong></li>
-        {% endif %}
-    {% empty %}
-        <li>Nenhum exame.</li>
-    {% endfor %}
-</ul>
+    <!-- Radiologia -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-white">🩻 Radiologia</div>
+            <div class="card-body">
+                {% if exames %}
+                <ul class="list-group">
+                    {% for exame in exames %}
+                        {% if exame.tipo == "radiologia" %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ exame.nome }}
+                            {% if exame.status == "pronto" %}
+                                <span class="badge bg-success">{{ exame.status|capfirst }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ exame.status|capfirst }}</span>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <p class="text-muted">Nenhum exame solicitado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 <hr>
 
@@ -72,17 +108,17 @@
 
     <div class="mb-3">
         <label>Diagnóstico</label>
-        <textarea name="diagnostico" class="form-control">{{ atendimento.diagnostico }}</textarea>
+        <textarea name="diagnostico" class="form-control" rows="3">{{ atendimento.diagnostico }}</textarea>
     </div>
 
     <div class="mb-3">
         <label>Prescrição</label>
-        <textarea name="prescricao" class="form-control">{{ atendimento.prescricao }}</textarea>
+        <textarea name="prescricao" class="form-control" rows="3">{{ atendimento.prescricao }}</textarea>
     </div>
 
     <div class="mb-3">
         <label>Observações</label>
-        <textarea name="observacoes" class="form-control">{{ atendimento.observacoes }}</textarea>
+        <textarea name="observacoes" class="form-control" rows="3">{{ atendimento.observacoes }}</textarea>
     </div>
 
     <div class="mb-3">

@@ -8,13 +8,30 @@ from .models import Atendimento
 from triagem.models import Triagem
 
 from .models import Atendimento, Exame
-# ==============================
-# DASHBOARD MÉDICO
-# ==============================
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Case, When, Value, IntegerField
+from triagem.models import Triagem
+from medico.models import Atendimento
+from django.db.models import Case, When, Value, IntegerField
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from triagem.models import Triagem
+from medico.models import Atendimento
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Case, When, Value, IntegerField
+from medico.models import Atendimento
+from triagem.models import Triagem
+
 @login_required
 def medico_dashboard(request):
     agora = timezone.now()
-    hoje = agora.date()
+    hoje = timezone.localdate()  # Data local do servidor/usuário
 
     # 🔴 TRIAGENS PENDENTES (ordenadas por prioridade)
     triagens = (
@@ -34,11 +51,10 @@ def medico_dashboard(request):
         .order_by("prioridade", "-data_triagem")
     )
 
-    # ✅ ATENDIMENTOS FINALIZADOS HOJE
+    # ✅ ATENDIMENTOS FINALIZADOS
     atendimentos_finalizados = Atendimento.objects.filter(
         medico=request.user,
-        finalizado=True,
-        data_atendimento__date=hoje
+        finalizado=True
     ).order_by("-data_atendimento")
 
     # 🟡 Aguardando técnico aplicar medicação
@@ -64,6 +80,20 @@ def medico_dashboard(request):
         finalizado=False
     ).order_by("-id")
 
+    # 📌 ATENDIMENTOS HOJE (qualquer status)
+    total_dia = Atendimento.objects.filter(
+        medico=request.user,
+        data_atendimento__date=hoje
+    ).count()
+
+    # 📌 ATENDIMENTOS FINALIZADOS (total do mês)
+    total_mes = Atendimento.objects.filter(
+        medico=request.user,
+        finalizado=True,
+        data_atendimento__year=agora.year,
+        data_atendimento__month=agora.month
+    ).count()
+
     context = {
         "triagens": triagens,
         "atendimentos_finalizados": atendimentos_finalizados,
@@ -72,17 +102,11 @@ def medico_dashboard(request):
         "internacoes": internacoes,
         "total_pendentes": triagens.count(),
         "total_atendidos": atendimentos_finalizados.count(),
-        "total_dia": atendimentos_finalizados.count(),
-        "total_mes": Atendimento.objects.filter(
-            medico=request.user,
-            finalizado=True,
-            data_atendimento__year=agora.year,
-            data_atendimento__month=agora.month
-        ).count(),
+        "total_dia": total_dia,
+        "total_mes": total_mes,
     }
 
     return render(request, "medico/dashboard.html", context)
-
 
 # ==============================
 # INICIAR ATENDIMENTO
@@ -110,12 +134,18 @@ def iniciar_atendimento(request, triagem_id):
 # ==============================
 # EDITAR / FINALIZAR ATENDIMENTO
 # ==============================
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Atendimento, Exame
+
 @login_required
 def editar_atendimento(request, atendimento_id):
     atendimento = get_object_or_404(Atendimento, id=atendimento_id)
     paciente = atendimento.paciente
     hoje = timezone.localdate()
 
+    # Atendimentos do paciente hoje (para medicações já prescritas)
     atendimentos_hoje = Atendimento.objects.filter(
         paciente=paciente,
         data_atendimento__date=hoje
@@ -127,14 +157,15 @@ def editar_atendimento(request, atendimento_id):
         if a.prescricao and a.prescricao.strip()
     ]
 
+    # Exames do atendimento
     exames = atendimento.exames.all()
 
     if request.method == "POST":
         acao = request.POST.get("acao")
 
-        # ==========================
+        # ==============================
         # 1️⃣ Solicitar novo exame
-        # ==========================
+        # ==============================
         if acao == "novo_exame":
             nome_exame = request.POST.get("nome_exame")
             tipo_exame = request.POST.get("tipo_exame")
@@ -148,9 +179,9 @@ def editar_atendimento(request, atendimento_id):
 
             return redirect("editar_atendimento", atendimento.id)
 
-        # ==========================
+        # ==============================
         # 2️⃣ Salvar atendimento
-        # ==========================
+        # ==============================
         elif acao == "salvar_atendimento":
             decisao = request.POST.get("decisao")
             if not decisao:
@@ -174,6 +205,16 @@ def editar_atendimento(request, atendimento_id):
             atendimento.save()
             return redirect("medico_dashboard")
 
+    return render(request, "medico/atendimento.html", {
+        "atendimento": atendimento,
+        "medicacoes_dia": medicacoes_dia,
+        "atendimentos_hoje": atendimentos_hoje,
+        "exames": exames,
+    })
+
+    # ==============================
+    # Renderiza template
+    # ==============================
     return render(request, "medico/atendimento.html", {
         "atendimento": atendimento,
         "medicacoes_dia": medicacoes_dia,
