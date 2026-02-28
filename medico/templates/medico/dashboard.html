@@ -9,6 +9,13 @@
     <!-- TÍTULO -->
     <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
+    <!-- FILTRO POR DATA -->
+    <form method="get" class="mb-3 d-flex align-items-center">
+        <label class="me-2">Filtrar por data:</label>
+        <input type="date" name="data_atendimento" value="{{ data_filtro }}" class="form-control me-2">
+        <button class="btn btn-primary">Filtrar</button>
+    </form>
+
     <!-- CARDS PRINCIPAIS -->
     <div class="row mb-4">
         <!-- Triagens Pendentes -->
