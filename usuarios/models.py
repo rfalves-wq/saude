@@ -4,11 +4,12 @@ from django.core.exceptions import ValidationError
 
 class Usuario(AbstractUser):
     PERFIL_CHOICES = [
-        ('administrador', 'Administrador'),
-        ('medico', 'Médico'),
-        ('enfermeiro', 'Enfermeiro'),
-        ('tecnico', 'Técnico'),
-        ('recepcao', 'Recepção'),
+    ('administrador', 'Administrador'),
+    ('medico', 'Médico'),
+    ('enfermeiro', 'Enfermeiro'),
+    ('tecnico', 'Técnico'),
+    ('recepcao', 'Recepção'),
+    ('laboratorio', 'Laboratório'),
     ]
     perfil = models.CharField(max_length=20, choices=PERFIL_CHOICES, default='recepcao')
 

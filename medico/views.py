@@ -9,7 +9,7 @@ from django.db import transaction
 
 from triagem.models import Triagem
 from medico.models import Atendimento, Exame
-
+ 
 # ==================================================
 # DASHBOARD MÉDICO
 # ==================================================
@@ -84,20 +84,28 @@ def medico_dashboard(request):
         data_atendimento__year=agora.year,
         data_atendimento__month=agora.month
     ).count()
-
+    exames_prontos = Exame.objects.filter(
+    atendimento__medico=request.user,
+    status="pronto"
+).select_related(
+    "atendimento",
+    "atendimento__paciente"
+).order_by("-id")
     context = {
-        "triagens": triagens,
-        "atendimentos_finalizados": atendimentos_finalizados,
-        "aguardando_medicacao": aguardando_medicacao,
-        "medicacao_aplicada": medicacao_aplicada,
-        "internacoes": internacoes,
-        "total_pendentes": total_pendentes,
-        "total_atendidos": total_atendidos,
-        "total_dia": total_dia,
-        "total_mes": total_mes,
-        "data_filtro": filtro_data,
-    }
-
+    "triagens": triagens,
+    "atendimentos_finalizados": atendimentos_finalizados,
+    "aguardando_medicacao": aguardando_medicacao,
+    "medicacao_aplicada": medicacao_aplicada,
+    "internacoes": internacoes,
+    "total_pendentes": total_pendentes,
+    "total_atendidos": total_atendidos,
+    "total_dia": total_dia,
+    "total_mes": total_mes,
+    "data_filtro": filtro_data,
+    "exames_prontos": exames_prontos,
+}
+    
+    
     return render(request, "medico/dashboard.html", context)
 
 # ==================================================
@@ -219,3 +227,87 @@ def aplicar_medicacao(request, atendimento_id):
 
     atendimento.aplicar_medicacao(request.user)
     return redirect("tecnico_dashboard")
+
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Exame
+
+# Verifica se é laboratório
+def apenas_laboratorio(user):
+    return user.is_authenticated and user.perfil == "laboratorio"
+
+@login_required
+@user_passes_test(apenas_laboratorio)
+def laboratorio_lista(request):
+    exames = Exame.objects.filter(
+        tipo="laboratorio",
+        status="solicitado"
+    ).select_related("atendimento", "atendimento__paciente")
+
+    return render(request, "medico/laboratorio_lista.html", {
+        "exames": exames
+    })
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+
+@login_required
+@user_passes_test(apenas_laboratorio)
+def inserir_resultado(request, pk):
+    exame = get_object_or_404(Exame, pk=pk)
+
+    if request.method == "POST":
+        resultado = request.POST.get("resultado")
+
+        exame.resultado = resultado
+        exame.status = "pronto"
+        exame.save()
+
+        return redirect("laboratorio_lista")
+
+    return render(request, "medico/inserir_resultado.html", {
+        "exame": exame
+    })
+
+from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
+from .models import Exame
+
+@login_required
+def visualizar_exame(request, exame_id):
+    exame = get_object_or_404(Exame, id=exame_id)
+    return render(request, 'medico/visualizar_exame.html', {'exame': exame})
+from django.http import HttpResponse
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+
+@login_required
+def gerar_pdf_exame(request, exame_id):
+    exame = get_object_or_404(Exame, id=exame_id)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="exame_{exame.id}.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    elements.append(Paragraph(f"<b>Exame:</b> {exame.nome}", styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    elements.append(Paragraph(
+        f"<b>Paciente:</b> {exame.atendimento.paciente.nome}",
+        styles['Normal']
+    ))
+    elements.append(Spacer(1, 12))
+
+    elements.append(Paragraph(
+        f"<b>Resultado:</b> {exame.resultado or 'Sem resultado'}",
+        styles['Normal']
+    ))
+
+    doc.build(elements)
+
+    return response

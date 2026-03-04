@@ -49,6 +49,8 @@ def login_view(request):
                         return redirect('tecnico_dashboard')
                     elif user.perfil == 'recepcao':
                         return redirect('recepcao_dashboard')
+                    elif user.perfil == 'laboratorio':
+                        return redirect('laboratorio_lista')
                 else:
                     error = "Usuário ou senha inválidos."
             else:
@@ -74,11 +76,17 @@ def login_view(request):
 # =========================
 # VERIFICA PERFIS
 # =========================
+# =========================
+# VERIFICA PERFIS
+# =========================
 def apenas_recepcao(user):
     return user.is_authenticated and user.perfil == 'recepcao'
 
 def apenas_admin(user):
     return user.is_authenticated and user.perfil == 'administrador'
+
+def apenas_laboratorio(user):
+    return user.is_authenticated and user.perfil == 'laboratorio'
 
 # =========================
 # DASHBOARDS

@@ -1,0 +1,11 @@
+<h2>Inserir Resultado</h2>
+
+<p><strong>Paciente:</strong> {{ exame.atendimento.paciente.nome }}</p>
+<p><strong>Exame:</strong> {{ exame.nome }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <textarea name="resultado" rows="5" required></textarea>
+    <br><br>
+    <button type="submit">Salvar Resultado</button>
+</form>

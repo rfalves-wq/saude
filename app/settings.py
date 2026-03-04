@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'triagem',
     'medico',
      'tecnico',
+     
 ]
 
 # ==============================

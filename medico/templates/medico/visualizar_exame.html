@@ -1,0 +1,17 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Exame: {{ exame.nome }}</h3>
+
+    <p><strong>Paciente:</strong> {{ exame.atendimento.paciente.nome }}</p>
+    <p><strong>Resultado:</strong></p>
+
+    <div class="border p-3">
+        {{ exame.resultado }}
+    </div>
+
+    <br>
+    <a href="{% url 'medico_dashboard' %}" class="btn btn-secondary">Voltar</a>
+</div>
+{% endblock %}

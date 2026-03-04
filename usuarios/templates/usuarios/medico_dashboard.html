@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
-
+fsfsfsfsfsfsfsfsfsf
     <!-- Totais -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -66,7 +66,38 @@
             {% endfor %}
         </tbody>
     </table>
-
+<!-- EXAMES PRONTOS -->
+<h3 class="mt-4">Exames Prontos</h3>
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Paciente</th>
+            <th>Exame</th>
+            <th>Resultado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exame in exames_prontos %}
+        <tr>
+            <td>{{ exame.atendimento.paciente.nome }}</td>
+            <td>{{ exame.nome }}</td>
+            <td>
+                {% if exame.resultado %}
+                    {{ exame.resultado }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">
+                Nenhum exame pronto
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
     <!-- Pacientes aguardando técnico aplicar medicação -->
     <h3>Medicação Pendentes (Técnico)</h3>
     <table class="table table-striped table-bordered">
