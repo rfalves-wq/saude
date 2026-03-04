@@ -11,6 +11,19 @@ from triagem.models import Triagem
 from medico.models import Atendimento, Exame
  
 # ==================================================
+# IMPORTS
+# ==================================================
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Case, When, Value, IntegerField
+from django.db import transaction
+from collections import OrderedDict
+
+from triagem.models import Triagem
+from medico.models import Atendimento, Exame
+
+# ==================================================
 # DASHBOARD MÉDICO
 # ==================================================
 @login_required
@@ -84,28 +97,50 @@ def medico_dashboard(request):
         data_atendimento__year=agora.year,
         data_atendimento__month=agora.month
     ).count()
-    exames_prontos = Exame.objects.filter(
-    atendimento__medico=request.user,
-    status="pronto"
-).select_related(
-    "atendimento",
-    "atendimento__paciente"
-).order_by("-id")
+
+    # 🔬 Exames prontos do dia, agrupados por paciente
+    exames_do_dia = Exame.objects.filter(
+        atendimento__medico=request.user,
+        atendimento__data_atendimento__date=filtro_data,
+        status="pronto"
+    ).select_related(
+        "atendimento",
+        "atendimento__paciente"
+    ).order_by(
+        "atendimento__paciente__nome",
+        "-atendimento__data_atendimento"
+    )
+
+    exames_por_paciente = OrderedDict()
+    for exame in exames_do_dia:
+        paciente_id = exame.atendimento.paciente.id
+        if paciente_id not in exames_por_paciente:
+            exames_por_paciente[paciente_id] = {
+                "paciente": exame.atendimento.paciente.nome,
+                "exames": [],
+                "resultados": [],
+                "ids": []
+            }
+        exames_por_paciente[paciente_id]["exames"].append(exame.nome)
+        exames_por_paciente[paciente_id]["resultados"].append(exame.resultado or "-")
+        exames_por_paciente[paciente_id]["ids"].append(exame.id)
+
+    exames_prontos = list(exames_por_paciente.values())
+
     context = {
-    "triagens": triagens,
-    "atendimentos_finalizados": atendimentos_finalizados,
-    "aguardando_medicacao": aguardando_medicacao,
-    "medicacao_aplicada": medicacao_aplicada,
-    "internacoes": internacoes,
-    "total_pendentes": total_pendentes,
-    "total_atendidos": total_atendidos,
-    "total_dia": total_dia,
-    "total_mes": total_mes,
-    "data_filtro": filtro_data,
-    "exames_prontos": exames_prontos,
-}
-    
-    
+        "triagens": triagens,
+        "atendimentos_finalizados": atendimentos_finalizados,
+        "aguardando_medicacao": aguardando_medicacao,
+        "medicacao_aplicada": medicacao_aplicada,
+        "internacoes": internacoes,
+        "total_pendentes": total_pendentes,
+        "total_atendidos": total_atendidos,
+        "total_dia": total_dia,
+        "total_mes": total_mes,
+        "data_filtro": filtro_data,
+        "exames_prontos": exames_prontos,
+    }
+
     return render(request, "medico/dashboard.html", context)
 
 # ==================================================

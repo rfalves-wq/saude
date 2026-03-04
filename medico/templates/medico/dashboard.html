@@ -1,20 +1,19 @@
 {% extends 'usuarios/base.html' %}
+{% load static %}
 
 {% block title %}Dashboard Médico{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-
     <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
-    <!-- FILTRO -->
-    <form method="get" class="mb-3 d-flex align-items-center">
-        <label class="me-2">Filtrar por data:</label>
-        <input type="date" name="data_atendimento" value="{{ data_filtro }}" class="form-control me-2">
-        <button class="btn btn-primary">Filtrar</button>
+    <!-- FILTRO DE DATA -->
+    <form method="get" class="mb-3 d-flex align-items-center gap-2">
+        <input type="date" name="data_atendimento" value="{{ data_filtro }}" class="form-control" style="max-width: 200px;">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
     </form>
 
-    <!-- CARDS -->
+    <!-- CARDS DE TOTAIS -->
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-danger text-center">
@@ -24,7 +23,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-success text-center">
                 <div class="card-body">
@@ -33,7 +31,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-info text-center">
                 <div class="card-body">
@@ -42,7 +39,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3 mb-2">
             <div class="card shadow-sm border-dark text-center">
                 <div class="card-body">
@@ -53,13 +49,13 @@
         </div>
     </div>
 
-    <!-- TRIAGENS -->
+    <!-- TRIAGENS PENDENTES -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-danger text-white">
             Triagens Aguardando Atendimento
         </div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -87,16 +83,12 @@
                         </td>
                         <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
                         <td>
-                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">
-                                Atender
-                            </a>
+                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted">
-                            Nenhuma triagem pendente
-                        </td>
+                        <td colspan="4" class="text-center text-muted">Nenhuma triagem pendente</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -109,8 +101,8 @@
         <div class="card-header bg-warning text-dark">
             Pacientes em Medicação / Internação
         </div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -120,13 +112,12 @@
                     </tr>
                 </thead>
                 <tbody>
-
                     {% for a in aguardando_medicacao %}
                     <tr>
                         <td>{{ a.paciente.nome }}</td>
                         <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.horario_medicacao|date:"d/m/Y H:i"|default:"-" }}</td>
-                        <td><span class="badge bg-warning">Aguardando técnico</span></td>
+                        <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
+                        <td><span class="badge bg-warning text-dark">Aguardando técnico</span></td>
                     </tr>
                     {% endfor %}
 
@@ -134,7 +125,7 @@
                     <tr>
                         <td>{{ a.paciente.nome }}</td>
                         <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.horario_medicacao|date:"d/m/Y H:i"|default:"-" }}</td>
+                        <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
                         <td>
                             <a href="{% url 'decidir_atendimento' a.id %}" class="btn btn-sm btn-primary">
                                 Dispensar / Internar
@@ -151,7 +142,6 @@
                         <td><span class="badge bg-danger">Internado</span></td>
                     </tr>
                     {% endfor %}
-
                 </tbody>
             </table>
         </div>
@@ -163,7 +153,7 @@
             Atendimentos Finalizados
         </div>
         <div class="card-body" style="max-height:400px; overflow-y:auto;">
-            <table class="table table-hover">
+            <table class="table table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
@@ -180,9 +170,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="text-center text-muted">
-                            Nenhum atendimento finalizado
-                        </td>
+                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -190,44 +178,45 @@
         </div>
     </div>
 
-    <!-- EXAMES -->
+    <!-- EXAMES PRONTOS (agrupados por paciente) -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
             Exames Prontos
         </div>
-        <div class="card-body">
-            <table class="table table-bordered">
+        <div class="card-body p-0">
+            <table class="table table-bordered mb-0">
                 <thead>
                     <tr>
                         <th>Paciente</th>
-                        <th>Exame</th>
-                        <th>Resultado</th>
+                        <th>Exames</th>
+                        <th>Resultados</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for exame in exames_prontos %}
-                    <tr>
-                        <td>{{ exame.atendimento.paciente.nome }}</td>
-                        <td>{{ exame.nome }}</td>
-                        <td>{{ exame.resultado|truncatechars:50 }}</td>
-                        <td>
-                            <a href="{% url 'visualizar_exame' exame.id %}" class="btn btn-sm btn-info">Ver</a>
-                            <a href="{% url 'gerar_pdf_exame' exame.id %}" class="btn btn-sm btn-secondary">PDF</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">
-                            Nenhum exame pronto.
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if exames_prontos %}
+                        {% for e in exames_prontos %}
+                        <tr>
+                            <td>{{ e.paciente }}</td>
+                            <td>{{ e.exames|join:", " }}</td>
+                            <td>{{ e.resultados|join:", " }}</td>
+                            <td>
+                                {% for id in e.ids %}
+                                    <a href="{% url 'visualizar_exame' id %}" class="btn btn-sm btn-info">Ver</a>
+                                    <a href="{% url 'gerar_pdf_exame' id %}" class="btn btn-sm btn-secondary">PDF</a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">Nenhum exame pronto</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
-
 </div>
 
 <style>
@@ -243,9 +232,7 @@
 </style>
 
 <script>
-setInterval(function(){
-    location.reload();
-}, 7000);
+setInterval(function(){ location.reload(); }, 7000);
 
 document.addEventListener("DOMContentLoaded", function() {
     let existeVermelho = document.querySelector(".alerta-vermelho");
