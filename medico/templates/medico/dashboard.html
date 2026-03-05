@@ -4,245 +4,578 @@
 {% block title %}Dashboard Médico{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">👨‍⚕️ Dashboard Médico</h2>
 
-    <!-- FILTRO DE DATA -->
-    <form method="get" class="mb-3 d-flex align-items-center gap-2">
-        <input type="date" name="data_atendimento" value="{{ data_filtro }}" class="form-control" style="max-width: 200px;">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-    </form>
 
-    <!-- CARDS DE TOTAIS -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-2">
-            <div class="card shadow-sm border-danger text-center">
-                <div class="card-body">
-                    <h6>Triagens Pendentes</h6>
-                    <h3 class="text-danger">{{ total_pendentes }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-2">
-            <div class="card shadow-sm border-success text-center">
-                <div class="card-body">
-                    <h6>Atendimentos Finalizados</h6>
-                    <h3 class="text-success">{{ total_atendidos }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-2">
-            <div class="card shadow-sm border-info text-center">
-                <div class="card-body">
-                    <h6>Atendimentos Hoje</h6>
-                    <h3 class="text-info">{{ total_dia }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-2">
-            <div class="card shadow-sm border-dark text-center">
-                <div class="card-body">
-                    <h6>Atendimentos no Mês</h6>
-                    <h3 class="text-dark">{{ total_mes }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TRIAGENS PENDENTES -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-danger text-white">
-            Triagens Aguardando Atendimento
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Classificação</th>
-                        <th>Data</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in triagens %}
-                    <tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
-                        <td>{{ t.paciente.nome }}</td>
-                        <td>
-                            {% if t.classificacao_risco == "Vermelho" %}
-                                <span class="badge bg-danger">Vermelho</span>
-                            {% elif t.classificacao_risco == "Laranja" %}
-                                <span class="badge" style="background-color: #fd7e14;">Laranja</span>
-                            {% elif t.classificacao_risco == "Amarelo" %}
-                                <span class="badge bg-warning text-dark">Amarelo</span>
-                            {% elif t.classificacao_risco == "Verde" %}
-                                <span class="badge bg-success">Verde</span>
-                            {% elif t.classificacao_risco == "Azul" %}
-                                <span class="badge bg-primary">Azul</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
-                        <td>
-                            <a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary">Atender</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">Nenhuma triagem pendente</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- MEDICAÇÃO / INTERNAÇÃO -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-warning text-dark">
-            Pacientes em Medicação / Internação
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Prescrição</th>
-                        <th>Horário</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in aguardando_medicacao %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
-                        <td><span class="badge bg-warning text-dark">Aguardando técnico</span></td>
-                    </tr>
-                    {% endfor %}
-
-                    {% for a in medicacao_aplicada %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
-                        <td>
-                            <a href="{% url 'decidir_atendimento' a.id %}" class="btn btn-sm btn-primary">
-                                Dispensar / Internar
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                    {% for a in internacoes %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.data_atendimento|date:"d/m/Y H:i"|default:"-" }}</td>
-                        <td><span class="badge bg-danger">Internado</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- FINALIZADOS -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-success text-white">
-            Atendimentos Finalizados
-        </div>
-        <div class="card-body" style="max-height:400px; overflow-y:auto;">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Prescrição</th>
-                        <th>Data</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in atendimentos_finalizados %}
-                    <tr>
-                        <td>{{ a.paciente.nome }}</td>
-                        <td>{{ a.prescricao|default:"-" }}</td>
-                        <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center text-muted">Nenhum atendimento finalizado</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- EXAMES PRONTOS (agrupados por paciente) -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            Exames Prontos
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-bordered mb-0">
-                <thead>
-                    <tr>
-                        <th>Paciente</th>
-                        <th>Exames</th>
-                        <th>Resultados</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if exames_prontos %}
-                        {% for e in exames_prontos %}
-                        <tr>
-                            <td>{{ e.paciente }}</td>
-                            <td>{{ e.exames|join:", " }}</td>
-                            <td>{{ e.resultados|join:", " }}</td>
-                            <td>
-                                {% for id in e.ids %}
-                                    <a href="{% url 'visualizar_exame' id %}" class="btn btn-sm btn-info">Ver</a>
-                                    <a href="{% url 'gerar_pdf_exame' id %}" class="btn btn-sm btn-secondary">PDF</a>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center">Nenhum exame pronto</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- PAINEL DE PRIORIDADE -->
+<div class="card shadow-sm mb-4">
+<div class="card-header bg-dark text-white">
+🚑 Fila de Atendimento por Prioridade
 </div>
 
+<div class="card-body">
+
+<div class="row text-center">
+
+<!-- VERMELHO -->
+<div class="col-md">
+<div class="card border-danger shadow-sm">
+<div class="card-body prioridade-vermelho">
+
+<h5 class="text-danger">🔴 Emergência</h5>
+
+{% for t in triagens %}
+{% if t.classificacao_risco == "Vermelho" %}
+
+<div class="fila-paciente">
+<strong>{{ t.paciente.nome }}</strong><br>
+<small>{{ t.data_triagem|timesince }} aguardando</small><br>
+
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-danger mt-1">
+Atender
+</a>
+
+</div>
+
+{% endif %}
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<!-- LARANJA -->
+<div class="col-md">
+<div class="card border-warning shadow-sm">
+<div class="card-body">
+
+<h5 style="color:#fd7e14">🟠 Muito Urgente</h5>
+
+{% for t in triagens %}
+{% if t.classificacao_risco == "Laranja" %}
+
+<div class="fila-paciente">
+<strong>{{ t.paciente.nome }}</strong><br>
+<small>{{ t.data_triagem|timesince }}</small><br>
+
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-warning mt-1">
+Atender
+</a>
+
+</div>
+
+{% endif %}
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<!-- AMARELO -->
+<div class="col-md">
+<div class="card border-warning shadow-sm">
+<div class="card-body">
+
+<h5 class="text-warning">🟡 Urgente</h5>
+
+{% for t in triagens %}
+{% if t.classificacao_risco == "Amarelo" %}
+
+<div class="fila-paciente">
+<strong>{{ t.paciente.nome }}</strong><br>
+<small>{{ t.data_triagem|timesince }}</small><br>
+
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-warning mt-1">
+Atender
+</a>
+
+</div>
+
+{% endif %}
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<!-- VERDE -->
+<div class="col-md">
+<div class="card border-success shadow-sm">
+<div class="card-body">
+
+<h5 class="text-success">🟢 Pouco Urgente</h5>
+
+{% for t in triagens %}
+{% if t.classificacao_risco == "Verde" %}
+
+<div class="fila-paciente">
+<strong>{{ t.paciente.nome }}</strong><br>
+<small>{{ t.data_triagem|timesince }}</small><br>
+
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-success mt-1">
+Atender
+</a>
+
+</div>
+
+{% endif %}
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<!-- AZUL -->
+<div class="col-md">
+<div class="card border-primary shadow-sm">
+<div class="card-body">
+
+<h5 class="text-primary">🔵 Não Urgente</h5>
+
+{% for t in triagens %}
+{% if t.classificacao_risco == "Azul" %}
+
+<div class="fila-paciente">
+<strong>{{ t.paciente.nome }}</strong><br>
+<small>{{ t.data_triagem|timesince }}</small><br>
+
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-primary mt-1">
+Atender
+</a>
+
+</div>
+
+{% endif %}
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+<div class="container mt-4">
+
+<!-- CABEÇALHO -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>👨‍⚕️ Dashboard Médico</h2>
+
+    <form method="get" class="d-flex gap-2">
+        <input type="date" name="data_atendimento"
+               value="{{ data_filtro }}"
+               class="form-control">
+
+        <button class="btn btn-primary">
+            Filtrar
+        </button>
+    </form>
+</div>
+
+
+<!-- CARDS -->
+<div class="row mb-4">
+
+<div class="col-md-3 mb-3">
+<div class="card shadow-sm text-center border-danger">
+<div class="card-body">
+<h6 class="text-muted">Triagens Pendentes</h6>
+<h2 class="text-danger">{{ total_pendentes }}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="card shadow-sm text-center border-success">
+<div class="card-body">
+<h6 class="text-muted">Finalizados</h6>
+<h2 class="text-success">{{ total_atendidos }}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="card shadow-sm text-center border-info">
+<div class="card-body">
+<h6 class="text-muted">Hoje</h6>
+<h2 class="text-info">{{ total_dia }}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="card shadow-sm text-center border-dark">
+<div class="card-body">
+<h6 class="text-muted">Este Mês</h6>
+<h2>{{ total_mes }}</h2>
+</div>
+</div>
+</div>
+
+</div>
+
+<!--
+ TRIAGENS
+<div class="card shadow-sm mb-4">
+<div class="card-header bg-danger text-white">
+🚨 Triagens aguardando atendimento
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+
+<thead class="table-light">
+<tr>
+<th>Paciente</th>
+<th>Classificação</th>
+<th>Data</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for t in triagens %}
+<tr class="{% if t.classificacao_risco == 'Vermelho' %}alerta-vermelho{% endif %}">
+
+<td>{{ t.paciente.nome }}</td>
+
+<td>
+
+{% if t.classificacao_risco == "Vermelho" %}
+<span class="badge bg-danger">Vermelho</span>
+
+{% elif t.classificacao_risco == "Laranja" %}
+<span class="badge" style="background:#fd7e14;">Laranja</span>
+
+{% elif t.classificacao_risco == "Amarelo" %}
+<span class="badge bg-warning text-dark">Amarelo</span>
+
+{% elif t.classificacao_risco == "Verde" %}
+<span class="badge bg-success">Verde</span>
+
+{% elif t.classificacao_risco == "Azul" %}
+<span class="badge bg-primary">Azul</span>
+{% endif %}
+
+</td>
+
+<td>{{ t.data_triagem|date:"d/m/Y H:i" }}</td>
+
+<td>
+<a href="{% url 'iniciar_atendimento' t.id %}"
+class="btn btn-sm btn-primary">
+Atender
+</a>
+</td>
+
+</tr>
+
+{% empty %}
+<tr>
+<td colspan="4" class="text-center text-muted">
+Nenhuma triagem pendente
+</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+</div>
+-->
+
+
+<!-- MEDICAÇÃO -->
+<div class="card shadow-sm mb-4">
+<div class="card-header bg-warning">
+💊 Pacientes em Medicação / Internação
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+
+<thead class="table-light">
+<tr>
+<th>Paciente</th>
+<th>Prescrição</th>
+<th>Horário</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for a in aguardando_medicacao %}
+<tr>
+<td>{{ a.paciente.nome }}</td>
+<td>{{ a.prescricao|default:"-" }}</td>
+<td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
+
+<td>
+<span class="badge bg-warning text-dark">
+Aguardando técnico
+</span>
+</td>
+
+</tr>
+{% endfor %}
+
+
+{% for a in medicacao_aplicada %}
+<tr>
+
+<td>{{ a.paciente.nome }}</td>
+
+<td>{{ a.prescricao|default:"-" }}</td>
+
+<td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
+
+<td>
+
+<a href="{% url 'decidir_atendimento' a.id %}"
+class="btn btn-sm btn-primary">
+
+Dispensar / Internar
+
+</a>
+
+</td>
+
+</tr>
+{% endfor %}
+
+
+{% for a in internacoes %}
+<tr>
+
+<td>{{ a.paciente.nome }}</td>
+
+<td>{{ a.prescricao|default:"-" }}</td>
+
+<td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
+
+<td>
+<span class="badge bg-danger">
+Internado
+</span>
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+<!-- FINALIZADOS -->
+<div class="card shadow-sm mb-4">
+
+<div class="card-header bg-success text-white">
+✔ Atendimentos Finalizados
+</div>
+
+<div class="table-responsive" style="max-height:350px">
+
+<table class="table table-hover mb-0">
+
+<thead class="table-light">
+<tr>
+<th>Paciente</th>
+<th>Prescrição</th>
+<th>Data</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for a in atendimentos_finalizados %}
+<tr>
+
+<td>{{ a.paciente.nome }}</td>
+
+<td>{{ a.prescricao|default:"-" }}</td>
+
+<td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="3" class="text-center text-muted">
+Nenhum atendimento finalizado
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+</div>
+
+
+
+<!-- EXAMES PRONTOS -->
+<div class="card shadow-sm mb-5">
+
+<div class="card-header bg-primary text-white">
+🧪 Exames Prontos
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered mb-0">
+
+<thead class="table-light">
+<tr>
+<th>Paciente</th>
+<th>Exames</th>
+<th>Resultados</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for e in exames_prontos %}
+<tr>
+
+<td>{{ e.paciente }}</td>
+
+<td>{{ e.exames|join:", " }}</td>
+
+<td>{{ e.resultados|join:", " }}</td>
+
+<td>
+
+{% for id in e.ids %}
+
+<a href="{% url 'visualizar_exame' id %}"
+class="btn btn-sm btn-info">
+Ver
+</a>
+
+<a href="{% url 'gerar_pdf_exame' id %}"
+class="btn btn-sm btn-secondary">
+PDF
+</a>
+
+{% endfor %}
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="4" class="text-center">
+Nenhum exame pronto
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+
+
 <style>
-.alerta-vermelho {
-    animation: piscar 0.8s infinite;
-    font-weight: bold;
+
+.alerta-vermelho{
+animation: piscar 0.8s infinite;
+font-weight:bold;
 }
-@keyframes piscar {
-    0% { background-color: #ffd6d6; }
-    50% { background-color: #ff0000; color: white; }
-    100% { background-color: #ffd6d6; }
+
+@keyframes piscar{
+
+0%{background:#ffd6d6;}
+
+50%{
+background:#ff0000;
+color:white;
+}
+
+100%{background:#ffd6d6;}
+
+}
+
+
+.fila-paciente{
+padding:8px;
+border-bottom:1px solid #eee;
+margin-bottom:6px;
+}
+
+.prioridade-vermelho{
+animation: piscar 0.8s infinite;
+}
+
+@keyframes piscar{
+
+0%{background:#fff;}
+
+50%{
+background:#ff0000;
+color:white;
+}
+
+100%{background:#fff;}
+
 }
 </style>
 
-<script>
-setInterval(function(){ location.reload(); }, 7000);
 
-document.addEventListener("DOMContentLoaded", function() {
-    let existeVermelho = document.querySelector(".alerta-vermelho");
-    if (existeVermelho) {
-        setTimeout(function(){
-            let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
-            audio.play().catch(e => console.log("Som bloqueado"));
-        }, 500);
-    }
+<script>
+
+/* auto atualizar */
+setInterval(function(){
+location.reload();
+},8000);
+
+
+/* alerta sonoro */
+document.addEventListener("DOMContentLoaded",function(){
+
+let vermelho=document.querySelector(".alerta-vermelho");
+
+if(vermelho){
+
+setTimeout(function(){
+
+let audio=new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+audio.play().catch(()=>{});
+
+},500);
+
+}
+
 });
+
 </script>
 
 {% endblock %}

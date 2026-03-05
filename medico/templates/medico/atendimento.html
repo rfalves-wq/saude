@@ -1,50 +1,85 @@
 {% extends 'usuarios/base.html' %}
+
 {% block content %}
-<hr>
+<div class="container mt-4">
 
-<h4>🩺 Dados da Triagem</h4>
-
-{% if triagem %}
-<div class="card mb-3 shadow-sm">
-    <div class="card-body">
-
-        <div class="row">
-            <div class="col-md-3">
-                <strong>Pressão:</strong> {{ triagem.pressao_arterial }}
-            </div>
-
-            <div class="col-md-3">
-                <strong>Temperatura:</strong> {{ triagem.temperatura }} °C
-            </div>
-
-            <div class="col-md-3">
-                <strong>Frequência Cardíaca:</strong> {{ triagem.frequencia_cardiaca }}
-            </div>
-
-            <div class="col-md-3">
-                <strong>Saturação:</strong> {{ triagem.saturacao }} %
-            </div>
+<!-- CABEÇALHO -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1">👨‍⚕️ Atendimento Médico</h4>
+            <strong>Paciente:</strong> {{ atendimento.paciente.nome }}
         </div>
 
-        <div class="mt-2">
-            <strong>Queixa:</strong> {{ triagem.observacoes }}
+        <div class="text-end">
+            <strong>Médico:</strong><br>
+            {{ request.user.get_full_name }}
+        </div>
+    </div>
+</div>
+
+
+<!-- TRIAGEM -->
+<h5 class="mb-2">🩺 Dados da Triagem</h5>
+
+{% if triagem %}
+<div class="card shadow-sm mb-4 border-primary">
+    <div class="card-body">
+
+        <div class="row text-center">
+
+            <div class="col-md-3">
+                <div class="p-2 border rounded bg-light">
+                    <small class="text-muted">Pressão</small><br>
+                    <strong>{{ triagem.pressao_arterial }}</strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-2 border rounded bg-light">
+                    <small class="text-muted">Temperatura</small><br>
+                    <strong>{{ triagem.temperatura }} °C</strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-2 border rounded bg-light">
+                    <small class="text-muted">Frequência Cardíaca</small><br>
+                    <strong>{{ triagem.frequencia_cardiaca }} bpm</strong>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-2 border rounded bg-light">
+                    <small class="text-muted">Saturação</small><br>
+                    <strong>{{ triagem.saturacao }} %</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div>
+            <strong>Queixa do paciente:</strong><br>
+            {{ triagem.observacoes }}
         </div>
 
     </div>
 </div>
 
 {% else %}
-<p class="text-muted">Triagem ainda não realizada.</p>
+<div class="alert alert-warning">
+    Triagem ainda não realizada.
+</div>
 {% endif %}
-<h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
-<p><strong>Médico logado:</strong> {{ request.user.get_full_name }}</p>
 
-<hr>
 
+<!-- MEDICAÇÕES DO DIA -->
 {% if medicacoes_dia %}
-<div class="alert alert-info">
-    <strong>Medicações já prescritas hoje:</strong>
-    <ul>
+<div class="alert alert-info mb-4">
+    <strong>💊 Medicações já prescritas hoje:</strong>
+    <ul class="mb-0">
         {% for prescricao, medico, hora in medicacoes_dia %}
             <li>{{ prescricao }} — <em>{{ medico }}</em> às {{ hora|time:"H:i" }}</li>
         {% endfor %}
@@ -52,121 +87,194 @@
 </div>
 {% endif %}
 
-<hr>
 
-<h4>🧪 Solicitar Exame</h4>
-<form method="POST" class="mb-4">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="novo_exame">
-
-    <div class="row mb-2">
-        <div class="col-md-4">
-            <select name="tipo_exame" class="form-select" required>
-                <option value="">-- Tipo do exame --</option>
-                <option value="laboratorio">Laboratório</option>
-                <option value="radiologia">Radiologia</option>
-            </select>
-        </div>
-        <div class="col-md-6">
-            <input type="text" name="nome_exame" placeholder="Ex: Hemograma, RX Tórax" class="form-control" required>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Solicitar</button>
-        </div>
-    </div>
-</form>
-
-<hr>
-
-<div class="row">
-    <!-- Laboratório -->
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">🧪 Laboratório</div>
-            <div class="card-body">
-                {% if exames %}
-                <ul class="list-group">
-                    {% for exame in exames %}
-                        {% if exame.tipo == "laboratorio" %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ exame.nome }}
-                            {% if exame.status == "pronto" %}
-                                <span class="badge bg-success">{{ exame.status|capfirst }}</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{{ exame.status|capfirst }}</span>
-                            {% endif %}
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-                {% else %}
-                    <p class="text-muted">Nenhum exame solicitado.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Radiologia -->
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm">
-            <div class="card-header bg-warning text-white">🩻 Radiologia</div>
-            <div class="card-body">
-                {% if exames %}
-                <ul class="list-group">
-                    {% for exame in exames %}
-                        {% if exame.tipo == "radiologia" %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ exame.nome }}
-                            {% if exame.status == "pronto" %}
-                                <span class="badge bg-success">{{ exame.status|capfirst }}</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{{ exame.status|capfirst }}</span>
-                            {% endif %}
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-                {% else %}
-                    <p class="text-muted">Nenhum exame solicitado.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<!-- SOLICITAR EXAME -->
+<div class="card shadow-sm mb-4">
+<div class="card-header bg-primary text-white">
+🧪 Solicitar Exame
 </div>
 
-<hr>
-
-<h4>📝 Salvar Atendimento</h4>
+<div class="card-body">
 <form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="salvar_atendimento">
+{% csrf_token %}
+<input type="hidden" name="acao" value="novo_exame">
 
-    <div class="mb-3">
-        <label>Diagnóstico</label>
-        <textarea name="diagnostico" class="form-control" rows="3">{{ atendimento.diagnostico }}</textarea>
-    </div>
+<div class="row">
 
-    <div class="mb-3">
-        <label>Prescrição</label>
-        <textarea name="prescricao" class="form-control" rows="3">{{ atendimento.prescricao }}</textarea>
-    </div>
+<div class="col-md-4">
+<select name="tipo_exame" class="form-select" required>
+<option value="">Tipo do exame</option>
+<option value="laboratorio">Laboratório</option>
+<option value="radiologia">Radiologia</option>
+</select>
+</div>
 
-    <div class="mb-3">
-        <label>Observações</label>
-        <textarea name="observacoes" class="form-control" rows="3">{{ atendimento.observacoes }}</textarea>
-    </div>
+<div class="col-md-6">
+<input type="text" name="nome_exame" class="form-control"
+placeholder="Ex: Hemograma, RX Tórax" required>
+</div>
 
-    <div class="mb-3">
-        <label>Decisão</label>
-        <select name="decisao" class="form-select" required>
-            <option value="">-- Selecione --</option>
-            <option value="dispensar" {% if atendimento.decisao == "dispensar" %}selected{% endif %}>Dispensar</option>
-            <option value="medicacao" {% if atendimento.decisao == "medicacao" %}selected{% endif %}>Medicação</option>
-            <option value="internacao" {% if atendimento.decisao == "internacao" %}selected{% endif %}>Internação</option>
-        </select>
-    </div>
+<div class="col-md-2">
+<button class="btn btn-primary w-100">
+Solicitar
+</button>
+</div>
 
-    <button type="submit" class="btn btn-success">Salvar Atendimento</button>
+</div>
+</form>
+</div>
+</div>
+
+
+<!-- EXAMES -->
+<div class="row mb-4">
+
+<div class="col-md-6">
+<div class="card shadow-sm">
+<div class="card-header bg-info text-white">
+🧪 Laboratório
+</div>
+
+<div class="card-body">
+
+{% if exames %}
+<ul class="list-group">
+
+{% for exame in exames %}
+{% if exame.tipo == "laboratorio" %}
+
+<li class="list-group-item d-flex justify-content-between">
+
+{{ exame.nome }}
+
+{% if exame.status == "pronto" %}
+<span class="badge bg-success">Pronto</span>
+{% else %}
+<span class="badge bg-secondary">Aguardando</span>
+{% endif %}
+
+</li>
+
+{% endif %}
+{% endfor %}
+
+</ul>
+{% else %}
+<p class="text-muted">Nenhum exame solicitado</p>
+{% endif %}
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-6">
+<div class="card shadow-sm">
+<div class="card-header bg-warning text-dark">
+🩻 Radiologia
+</div>
+
+<div class="card-body">
+
+{% if exames %}
+<ul class="list-group">
+
+{% for exame in exames %}
+{% if exame.tipo == "radiologia" %}
+
+<li class="list-group-item d-flex justify-content-between">
+
+{{ exame.nome }}
+
+{% if exame.status == "pronto" %}
+<span class="badge bg-success">Pronto</span>
+{% else %}
+<span class="badge bg-secondary">Aguardando</span>
+{% endif %}
+
+</li>
+
+{% endif %}
+{% endfor %}
+
+</ul>
+{% else %}
+<p class="text-muted">Nenhum exame solicitado</p>
+{% endif %}
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+<!-- ATENDIMENTO MÉDICO -->
+<div class="card shadow-sm mb-5">
+<div class="card-header bg-success text-white">
+📝 Registro do Atendimento
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+{% csrf_token %}
+<input type="hidden" name="acao" value="salvar_atendimento">
+
+<div class="mb-3">
+<label>Diagnóstico</label>
+<textarea name="diagnostico" class="form-control" rows="3">
+{{ atendimento.diagnostico }}
+</textarea>
+</div>
+
+<div class="mb-3">
+<label>Prescrição</label>
+<textarea name="prescricao" class="form-control" rows="3">
+{{ atendimento.prescricao }}
+</textarea>
+</div>
+
+<div class="mb-3">
+<label>Observações</label>
+<textarea name="observacoes" class="form-control" rows="3">
+{{ atendimento.observacoes }}
+</textarea>
+</div>
+
+<div class="mb-3">
+<label>Decisão</label>
+
+<select name="decisao" class="form-select" required>
+<option value="">Selecione</option>
+
+<option value="dispensar"
+{% if atendimento.decisao == "dispensar" %}selected{% endif %}>
+Dispensar
+</option>
+
+<option value="medicacao"
+{% if atendimento.decisao == "medicacao" %}selected{% endif %}>
+Medicação
+</option>
+
+<option value="internacao"
+{% if atendimento.decisao == "internacao" %}selected{% endif %}>
+Internação
+</option>
+
+</select>
+
+</div>
+
+<button class="btn btn-success w-100">
+💾 Salvar Atendimento
+</button>
+
 </form>
 
+</div>
+</div>
+
+</div>
 {% endblock %}
