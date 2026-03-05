@@ -166,10 +166,15 @@ def iniciar_atendimento(request, triagem_id):
 # ==================================================
 # EDITAR / FINALIZAR ATENDIMENTO
 # ==================================================
+# ==================================================
+# EDITAR / FINALIZAR ATENDIMENTO
+# ==================================================
 @login_required
 def editar_atendimento(request, atendimento_id):
     atendimento = get_object_or_404(Atendimento, id=atendimento_id)
     paciente = atendimento.paciente
+    triagem = atendimento.triagem  # 👈 triagem do enfermeiro
+
     hoje = timezone.localdate()
 
     # Atendimentos do paciente hoje (para medicações já prescritas)
@@ -194,17 +199,21 @@ def editar_atendimento(request, atendimento_id):
         if acao == "novo_exame":
             nome_exame = request.POST.get("nome_exame")
             tipo_exame = request.POST.get("tipo_exame")
+
             if nome_exame and tipo_exame:
                 Exame.objects.create(
                     atendimento=atendimento,
                     nome=nome_exame,
                     tipo=tipo_exame
                 )
+
             return redirect("editar_atendimento", atendimento.id)
 
         # 2️⃣ Salvar atendimento
         elif acao == "salvar_atendimento":
+
             decisao = request.POST.get("decisao")
+
             if not decisao:
                 return redirect("editar_atendimento", atendimento.id)
 
@@ -215,19 +224,23 @@ def editar_atendimento(request, atendimento_id):
 
             if decisao == "dispensar":
                 atendimento.finalizado = True
+
             elif decisao == "medicacao":
                 atendimento.finalizado = False
                 atendimento.medicacao_aplicada = False
                 atendimento.tecnico_aplicou = None
                 atendimento.horario_medicacao = None
+
             elif decisao == "internacao":
                 atendimento.finalizado = False
 
             atendimento.save()
+
             return redirect("medico_dashboard")
 
     return render(request, "medico/atendimento.html", {
         "atendimento": atendimento,
+        "triagem": triagem,          # 👈 agora vai aparecer no template
         "medicacoes_dia": medicacoes_dia,
         "atendimentos_hoje": atendimentos_hoje,
         "exames": exames,
@@ -346,3 +359,26 @@ def gerar_pdf_exame(request, exame_id):
     doc.build(elements)
 
     return response
+
+
+    
+
+   
+
+@login_required
+def atendimento_medico(request, atendimento_id):
+
+    atendimento = get_object_or_404(Atendimento, id=atendimento_id)
+
+    triagem = Triagem.objects.filter(atendimento=atendimento).first()
+
+    exames = Exame.objects.filter(atendimento=atendimento)
+
+    context = {
+        "atendimento": atendimento,
+        "triagem": triagem,
+        "exames": exames,
+        "medicacoes_dia": medicacoes_dia
+    }
+
+    return render(request, "medico/atendimento.html", context)

@@ -1,6 +1,41 @@
 {% extends 'usuarios/base.html' %}
 {% block content %}
+<hr>
 
+<h4>🩺 Dados da Triagem</h4>
+
+{% if triagem %}
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Pressão:</strong> {{ triagem.pressao_arterial }}
+            </div>
+
+            <div class="col-md-3">
+                <strong>Temperatura:</strong> {{ triagem.temperatura }} °C
+            </div>
+
+            <div class="col-md-3">
+                <strong>Frequência Cardíaca:</strong> {{ triagem.frequencia_cardiaca }}
+            </div>
+
+            <div class="col-md-3">
+                <strong>Saturação:</strong> {{ triagem.saturacao }} %
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <strong>Queixa:</strong> {{ triagem.observacoes }}
+        </div>
+
+    </div>
+</div>
+
+{% else %}
+<p class="text-muted">Triagem ainda não realizada.</p>
+{% endif %}
 <h2>Atendimento: {{ atendimento.paciente.nome }}</h2>
 <p><strong>Médico logado:</strong> {{ request.user.get_full_name }}</p>
 
