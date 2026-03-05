@@ -41,6 +41,10 @@ class Triagem(models.Model):
     atendido = models.BooleanField(default=False)
     data_triagem = models.DateTimeField(auto_now_add=True)
 
+    #entrou_fila = models.DateTimeField(null=True, blank=True)
+    #iniciou_atendimento = models.DateTimeField(null=True, blank=True)
+    #tempo_espera_minutos = models.IntegerField(null=True, blank=True)
+
     def __str__(self):
         return f"Triagem - {self.paciente.nome}"
 

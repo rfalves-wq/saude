@@ -365,14 +365,27 @@ def gerar_pdf_exame(request, exame_id):
 
    
 
-@login_required
 def atendimento_medico(request, atendimento_id):
 
     atendimento = get_object_or_404(Atendimento, id=atendimento_id)
 
-    triagem = Triagem.objects.filter(atendimento=atendimento).first()
+    paciente = atendimento.paciente
+    hoje = timezone.localdate()
+
+    triagem = atendimento.triagem
 
     exames = Exame.objects.filter(atendimento=atendimento)
+
+    atendimentos_hoje = Atendimento.objects.filter(
+        paciente=paciente,
+        data_atendimento__date=hoje
+    )
+
+    medicacoes_dia = [
+        (a.prescricao, a.medico.get_full_name(), a.data_atendimento.time())
+        for a in atendimentos_hoje
+        if a.prescricao and a.prescricao.strip()
+    ]
 
     context = {
         "atendimento": atendimento,
