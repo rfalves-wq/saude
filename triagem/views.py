@@ -47,6 +47,7 @@ def realizar_triagem(request, id):
             triagem.paciente = agendamento.paciente
             triagem.enfermeiro = request.user
 
+            triagem.entrou_fila = timezone.now()  # paciente entrou na fila do médico
             triagem.save()
 
             agendamento.status = "Aguardando Médico"
@@ -277,4 +278,5 @@ def triagens_por_dia(request):
     }
 
     return render(request, 'triagem/triagens_por_dia.html', context)
+
 

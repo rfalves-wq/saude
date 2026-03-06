@@ -145,19 +145,37 @@ def medico_dashboard(request):
 
 # ==================================================
 # INICIAR ATENDIMENTO
+from django.utils import timezone
+
+# ==================================================
+# INICIAR ATENDIMENTO
 # ==================================================
 @login_required
 def iniciar_atendimento(request, triagem_id):
+
     with transaction.atomic():
+
         triagem = Triagem.objects.select_for_update().get(id=triagem_id)
+
         if triagem.atendido:
             return redirect("medico_dashboard")
+
+        agora = timezone.now()
+
+        # registra início do atendimento
+        triagem.iniciou_atendimento = agora
+
+        # calcula tempo de espera
+        if triagem.entrou_fila:
+            tempo = agora - triagem.entrou_fila
+            triagem.tempo_espera_minutos = int(tempo.total_seconds() / 60)
 
         atendimento = Atendimento.objects.create(
             paciente=triagem.paciente,
             medico=request.user,
             triagem=triagem
         )
+
         triagem.atendido = True
         triagem.save()
 

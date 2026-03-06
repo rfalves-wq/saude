@@ -1,0 +1,66 @@
+Estrutura lógica da fila no seu sistema
+
+Fluxo real do paciente no banco:
+
+1️⃣ Recepção agenda
+
+Tabela
+recepcao_agendamento
+
+Campos importantes:
+
+paciente
+
+data_agendamento
+
+2️⃣ Paciente entra na triagem
+
+Tabela
+triagem_triagem
+
+Campos:
+
+id
+paciente_id
+agendamento_id
+enfermeiro_id
+data_triagem
+atendido
+
+Aqui começa a contagem da fila.
+
+3️⃣ Médico inicia atendimento
+
+Tabela
+medico_atendimento
+
+Campos principais:
+
+id
+paciente_id
+triagem_id
+medico_id
+data_atendimento
+
+Aqui termina a fila.
+
+Como calcular o tempo de espera
+
+Tempo de espera =
+
+data_atendimento - data_triagem
+
+Ou seja:
+
+medico_atendimento.data_atendimento
+-
+triagem_triagem.data_triagem
+Exemplo real no banco
+triagem_triagem
+id	paciente	data_triagem	atendido
+15	João	14:10	True
+medico_atendimento
+id	paciente	triagem	data_atendimento
+8	João	15	14:42
+tempo de espera
+14:42 - 14:10 = 32 minutos

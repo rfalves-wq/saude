@@ -28,7 +28,9 @@
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
-<small>{{ t.data_triagem|timesince }} aguardando</small><br>
+<small>
+⏱ {{ t.entrou_fila|timesince }} aguardando
+</small>
 
 <a href="{% url 'iniciar_atendimento' t.id %}"
 class="btn btn-sm btn-danger mt-1">
@@ -57,7 +59,9 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
-<small>{{ t.data_triagem|timesince }}</small><br>
+<small>
+⏱ {{ t.entrou_fila|timesince }} aguardando
+</small><br>
 
 <a href="{% url 'iniciar_atendimento' t.id %}"
 class="btn btn-sm btn-warning mt-1">
@@ -86,7 +90,9 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
-<small>{{ t.data_triagem|timesince }}</small><br>
+<small>
+⏱ {{ t.entrou_fila|timesince }} aguardando
+</small><br>
 
 <a href="{% url 'iniciar_atendimento' t.id %}"
 class="btn btn-sm btn-warning mt-1">
@@ -115,7 +121,9 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
-<small>{{ t.data_triagem|timesince }}</small><br>
+<small>
+⏱ {{ t.entrou_fila|timesince }} aguardando
+</small><br>
 
 <a href="{% url 'iniciar_atendimento' t.id %}"
 class="btn btn-sm btn-success mt-1">
@@ -144,7 +152,9 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
-<small>{{ t.data_triagem|timesince }}</small><br>
+<small>
+⏱ {{ t.entrou_fila|timesince }} aguardando
+</small>><br>
 
 <a href="{% url 'iniciar_atendimento' t.id %}"
 class="btn btn-sm btn-primary mt-1">
