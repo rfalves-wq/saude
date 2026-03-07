@@ -3,6 +3,10 @@
 
 {% block title %}Dashboard Médico{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard_medico.css' %}">
+{% endblock %}
+
 {% block content %}
 
 
@@ -513,79 +517,12 @@ Nenhum exame pronto
 
 </div>
 
-
-<style>
-
-.alerta-vermelho{
-animation: piscar 0.8s infinite;
-font-weight:bold;
-}
-
-@keyframes piscar{
-
-0%{background:#ffd6d6;}
-
-50%{
-background:#ff0000;
-color:white;
-}
-
-100%{background:#ffd6d6;}
-
-}
-
-
-.fila-paciente{
-padding:8px;
-border-bottom:1px solid #eee;
-margin-bottom:6px;
-}
-
-.prioridade-vermelho{
-animation: piscar 0.8s infinite;
-}
-
-@keyframes piscar{
-
-0%{background:#fff;}
-
-50%{
-background:#ff0000;
-color:white;
-}
-
-100%{background:#fff;}
-
-}
-</style>
-
-
-<script>
-
-/* auto atualizar */
-setInterval(function(){
-location.reload();
-},8000);
-
-
-/* alerta sonoro */
-document.addEventListener("DOMContentLoaded",function(){
-
-let vermelho=document.querySelector(".alerta-vermelho");
-
-if(vermelho){
-
-setTimeout(function(){
-
-let audio=new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
-audio.play().catch(()=>{});
-
-},500);
-
-}
-
-});
-
-</script>
-
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_medico.js' %}"></script>
+{% endblock %}
+
+
+
+

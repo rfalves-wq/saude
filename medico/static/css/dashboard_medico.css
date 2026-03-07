@@ -1,0 +1,40 @@
+.alerta-vermelho{
+animation: piscar 0.8s infinite;
+font-weight:bold;
+}
+
+@keyframes piscar{
+
+0%{background:#ffd6d6;}
+
+50%{
+background:#ff0000;
+color:white;
+}
+
+100%{background:#ffd6d6;}
+
+}
+
+.fila-paciente{
+padding:8px;
+border-bottom:1px solid #eee;
+margin-bottom:6px;
+}
+
+.prioridade-vermelho{
+animation: piscar 0.8s infinite;
+}
+
+@keyframes piscar{
+
+0%{background:#fff;}
+
+50%{
+background:#ff0000;
+color:white;
+}
+
+100%{background:#fff;}
+
+}
