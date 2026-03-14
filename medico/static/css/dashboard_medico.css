@@ -38,3 +38,14 @@ color:white;
 100%{background:#fff;}
 
 }
+
+
+.exame-novo{
+    animation: piscar 1s infinite;
+}
+
+@keyframes piscar{
+    0%{background:#fff3cd;}
+    50%{background:#ffe066;}
+    100%{background:#fff3cd;}
+}

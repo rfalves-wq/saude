@@ -4,22 +4,24 @@
 {% block title %}Dashboard Médico{% endblock %}
 
 {% block extra_css %}
+
 <link rel="stylesheet" href="{% static 'css/dashboard_medico.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<!-- PAINEL DE PRIORIDADE -->
+<!-- FILA POR PRIORIDADE -->
+
 <div class="card shadow-sm mb-4">
 <div class="card-header bg-dark text-white">
 🚑 Fila de Atendimento por Prioridade
 </div>
 
 <div class="card-body">
-
 <div class="row text-center">
 
 <!-- VERMELHO -->
+
 <div class="col-md">
 <div class="card border-danger shadow-sm">
 <div class="card-body prioridade-vermelho">
@@ -31,12 +33,12 @@
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
+
 <small>
 ⏱ {{ t.entrou_fila|timesince }} aguardando
-</small>
+</small><br>
 
-<a href="{% url 'iniciar_atendimento' t.id %}"
-class="btn btn-sm btn-danger mt-1">
+<a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-danger mt-1">
 Atender
 </a>
 
@@ -49,8 +51,8 @@ Atender
 </div>
 </div>
 
-
 <!-- LARANJA -->
+
 <div class="col-md">
 <div class="card border-warning shadow-sm">
 <div class="card-body">
@@ -62,12 +64,12 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
+
 <small>
 ⏱ {{ t.entrou_fila|timesince }} aguardando
 </small><br>
 
-<a href="{% url 'iniciar_atendimento' t.id %}"
-class="btn btn-sm btn-warning mt-1">
+<a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-warning mt-1">
 Atender
 </a>
 
@@ -80,8 +82,8 @@ Atender
 </div>
 </div>
 
-
 <!-- AMARELO -->
+
 <div class="col-md">
 <div class="card border-warning shadow-sm">
 <div class="card-body">
@@ -93,12 +95,12 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
+
 <small>
 ⏱ {{ t.entrou_fila|timesince }} aguardando
 </small><br>
 
-<a href="{% url 'iniciar_atendimento' t.id %}"
-class="btn btn-sm btn-warning mt-1">
+<a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-warning mt-1">
 Atender
 </a>
 
@@ -111,8 +113,8 @@ Atender
 </div>
 </div>
 
-
 <!-- VERDE -->
+
 <div class="col-md">
 <div class="card border-success shadow-sm">
 <div class="card-body">
@@ -124,12 +126,12 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
+
 <small>
 ⏱ {{ t.entrou_fila|timesince }} aguardando
 </small><br>
 
-<a href="{% url 'iniciar_atendimento' t.id %}"
-class="btn btn-sm btn-success mt-1">
+<a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-success mt-1">
 Atender
 </a>
 
@@ -142,8 +144,8 @@ Atender
 </div>
 </div>
 
-
 <!-- AZUL -->
+
 <div class="col-md">
 <div class="card border-primary shadow-sm">
 <div class="card-body">
@@ -155,12 +157,12 @@ Atender
 
 <div class="fila-paciente">
 <strong>{{ t.paciente.nome }}</strong><br>
+
 <small>
 ⏱ {{ t.entrou_fila|timesince }} aguardando
-</small>><br>
+</small><br>
 
-<a href="{% url 'iniciar_atendimento' t.id %}"
-class="btn btn-sm btn-primary mt-1">
+<a href="{% url 'iniciar_atendimento' t.id %}" class="btn btn-sm btn-primary mt-1">
 Atender
 </a>
 
@@ -177,30 +179,31 @@ Atender
 </div>
 </div>
 
-
-
-
-
-
 <div class="container mt-4">
 
 <!-- CABEÇALHO -->
+
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>👨‍⚕️ Dashboard Médico</h2>
 
-    <form method="get" class="d-flex gap-2">
-        <input type="date" name="data_atendimento"
-               value="{{ data_filtro }}"
-               class="form-control">
+<h2>👨‍⚕️ Dashboard Médico</h2>
 
-        <button class="btn btn-primary">
-            Filtrar
-        </button>
-    </form>
+<form method="get" class="d-flex gap-2">
+
+<input type="date"
+name="data_atendimento"
+value="{{ data_filtro }}"
+class="form-control">
+
+<button class="btn btn-primary">
+Filtrar
+</button>
+
+</form>
+
 </div>
 
-
 <!-- CARDS -->
+
 <div class="row mb-4">
 
 <div class="col-md-3 mb-3">
@@ -241,31 +244,35 @@ Atender
 
 </div>
 
-
-
-
 <!-- MEDICAÇÃO -->
+
 <div class="card shadow-sm mb-4">
+
 <div class="card-header bg-warning">
 💊 Pacientes em Medicação / Internação
 </div>
 
 <div class="table-responsive">
+
 <table class="table table-hover mb-0">
 
 <thead class="table-light">
+
 <tr>
 <th>Paciente</th>
 <th>Prescrição</th>
 <th>Horário</th>
 <th>Status</th>
 </tr>
+
 </thead>
 
 <tbody>
 
 {% for a in aguardando_medicacao %}
+
 <tr>
+
 <td>{{ a.paciente.nome }}</td>
 <td>{{ a.prescricao|default:"-" }}</td>
 <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
@@ -279,38 +286,29 @@ Aguardando técnico
 </tr>
 {% endfor %}
 
-
 {% for a in medicacao_aplicada %}
+
 <tr>
 
 <td>{{ a.paciente.nome }}</td>
-
 <td>{{ a.prescricao|default:"-" }}</td>
-
 <td>{{ a.horario_medicacao|time:"H:i"|default:"-" }}</td>
 
 <td>
-
-<a href="{% url 'decidir_atendimento' a.id %}"
-class="btn btn-sm btn-primary">
-
+<a href="{% url 'decidir_atendimento' a.id %}" class="btn btn-sm btn-primary">
 Dispensar / Internar
-
 </a>
-
 </td>
 
 </tr>
 {% endfor %}
 
-
 {% for a in internacoes %}
+
 <tr>
 
 <td>{{ a.paciente.nome }}</td>
-
 <td>{{ a.prescricao|default:"-" }}</td>
-
 <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
 
 <td>
@@ -324,12 +322,12 @@ Internado
 
 </tbody>
 </table>
+
 </div>
 </div>
-
-
 
 <!-- FINALIZADOS -->
+
 <div class="card shadow-sm mb-4">
 
 <div class="card-header bg-success text-white">
@@ -351,14 +349,11 @@ Internado
 <tbody>
 
 {% for a in atendimentos_finalizados %}
+
 <tr>
-
 <td>{{ a.paciente.nome }}</td>
-
 <td>{{ a.prescricao|default:"-" }}</td>
-
 <td>{{ a.data_atendimento|date:"d/m/Y H:i" }}</td>
-
 </tr>
 
 {% empty %}
@@ -372,12 +367,14 @@ Nenhum atendimento finalizado
 {% endfor %}
 
 </tbody>
+
 </table>
 
 </div>
 </div>
 
 <!-- EXAMES PRONTOS -->
+
 <div class="card shadow-sm mb-5">
 
 <div class="card-header bg-primary text-white">
@@ -393,62 +390,66 @@ Nenhum atendimento finalizado
 <th>Paciente</th>
 <th>Laboratório</th>
 <th>Radiologia</th>
-<th>Resultados</th>
-<th></th>
 </tr>
 </thead>
 
 <tbody>
 
-{% for e in exames_prontos %}
-<tr>
+{% for p in exames_prontos %}
 
-<td>{{ e.paciente }}</td>
+<tr class="exame-novo">
 
-<td>
-{% for nome in e.exames %}
-{% if "Laboratório" in nome %}
-{{ nome }}<br>
-{% endif %}
-{% endfor %}
-</td>
+<td>{{ p.paciente }}</td>
 
 <td>
-{% for nome in e.exames %}
-{% if "Radiologia" in nome %}
-{{ nome }}<br>
-{% endif %}
-{% endfor %}
-</td>
+{% if p.laboratorio %}
+{% for ex in p.laboratorio %}
 
-<td>{{ e.resultados|join:", " }}</td>
+{{ ex.nome }}<br>
 
-<td>
-
-{% for id in e.ids %}
-
-<a href="{% url 'visualizar_exame' id %}" class="btn btn-sm btn-info">
+<a href="{% url 'visualizar_exame' ex.id %}" class="btn btn-sm btn-info">
 Ver
 </a>
 
-<a href="{% url 'gerar_pdf_exame' id %}" class="btn btn-sm btn-secondary">
+<a href="{% url 'gerar_pdf_exame' ex.id %}" class="btn btn-sm btn-danger">
 PDF
 </a>
 
+<hr>
+
 {% endfor %}
+{% else %}
+----------
+
+{% endif %}
+
+</td>
+
+<td>
+{% if p.radiologia %}
+{% for ex in p.radiologia %}
+
+{{ ex.nome }}<br>
+
+<a href="{% url 'visualizar_exame' ex.id %}" class="btn btn-sm btn-info">
+Ver
+</a>
+
+<a href="{% url 'gerar_pdf_exame' ex.id %}" class="btn btn-sm btn-danger">
+PDF
+</a>
+
+<hr>
+
+{% endfor %}
+{% else %}
+----------
+
+{% endif %}
 
 </td>
 
 </tr>
-
-{% empty %}
-
-<tr>
-<td colspan="5" class="text-center">
-Nenhum exame pronto
-</td>
-</tr>
-
 {% endfor %}
 
 </tbody>
@@ -458,12 +459,12 @@ Nenhum exame pronto
 </div>
 </div>
 
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
+
 <script src="{% static 'js/dashboard_medico.js' %}"></script>
+
 {% endblock %}
-
-
-
-

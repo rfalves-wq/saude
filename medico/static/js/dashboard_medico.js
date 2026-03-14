@@ -1,7 +1,7 @@
 /* auto atualizar */
-setInterval(function(){
-location.reload();
-},8000);
+setTimeout(function(){
+    location.reload();
+}, 30000);
 
 
 /* alerta sonoro */

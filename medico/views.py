@@ -23,15 +23,12 @@ from collections import OrderedDict
 from triagem.models import Triagem
 from medico.models import Atendimento, Exame
 
-# ==================================================
-# DASHBOARD MÉDICO
-# ==================================================
 @login_required
 def medico_dashboard(request):
     agora = timezone.now()
-    hoje = timezone.localdate()  # Data local
+    hoje = timezone.localdate()
 
-    # FILTRO POR DATA via GET
+    # FILTRO POR DATA
     data_filtro = request.GET.get("data_atendimento")
     if data_filtro:
         try:
@@ -41,7 +38,7 @@ def medico_dashboard(request):
     else:
         filtro_data = hoje
 
-    # 🔴 Triagens pendentes (ordenadas por prioridade)
+    # 🔴 Triagens pendentes
     triagens = Triagem.objects.filter(atendido=False).annotate(
         prioridade=Case(
             When(classificacao_risco="Vermelho", then=Value(1)),
@@ -54,14 +51,14 @@ def medico_dashboard(request):
         )
     ).order_by("prioridade", "-data_triagem")
 
-    # ✅ Atendimentos finalizados na data filtrada
+    # ✅ Atendimentos finalizados
     atendimentos_finalizados = Atendimento.objects.filter(
         medico=request.user,
         finalizado=True,
         data_atendimento__date=filtro_data
     ).order_by("-data_atendimento")
 
-    # 🟡 Aguardando técnico aplicar medicação
+    # 🟡 Aguardando técnico
     aguardando_medicacao = Atendimento.objects.filter(
         medico=request.user,
         decisao="medicacao",
@@ -77,20 +74,22 @@ def medico_dashboard(request):
         finalizado=False
     ).order_by("-id")
 
-    # 🔴 Internações ativas
+    # 🔴 Internações
     internacoes = Atendimento.objects.filter(
         medico=request.user,
         decisao="internacao",
         finalizado=False
     ).order_by("-id")
 
-    # 📌 Totais
+    # 📊 Totais
     total_pendentes = triagens.count()
     total_atendidos = atendimentos_finalizados.count()
+
     total_dia = Atendimento.objects.filter(
         medico=request.user,
         data_atendimento__date=filtro_data
     ).count()
+
     total_mes = Atendimento.objects.filter(
         medico=request.user,
         finalizado=True,
@@ -98,7 +97,7 @@ def medico_dashboard(request):
         data_atendimento__month=agora.month
     ).count()
 
-    # 🔬 Exames prontos do dia, agrupados por paciente
+    # 🔬 EXAMES PRONTOS
     exames_do_dia = Exame.objects.filter(
         atendimento__medico=request.user,
         atendimento__data_atendimento__date=filtro_data,
@@ -106,23 +105,34 @@ def medico_dashboard(request):
     ).select_related(
         "atendimento",
         "atendimento__paciente"
-    ).order_by(
-        "atendimento__paciente__nome",
-        "-atendimento__data_atendimento"
-    )
+    ).order_by("atendimento__paciente__nome")
 
     exames_por_paciente = OrderedDict()
+
     for exame in exames_do_dia:
+
         paciente_id = exame.atendimento.paciente.id
+
         if paciente_id not in exames_por_paciente:
             exames_por_paciente[paciente_id] = {
                 "paciente": exame.atendimento.paciente.nome,
-                "exames": [],
-                "resultados": [],
+                "laboratorio": [],
+                "radiologia": [],
                 "ids": []
             }
-        exames_por_paciente[paciente_id]["exames"].append(exame.nome)
-        exames_por_paciente[paciente_id]["resultados"].append(exame.resultado or "-")
+
+        if exame.tipo == "laboratorio":
+         exames_por_paciente[paciente_id]["laboratorio"].append({
+        "nome": exame.nome,
+        "id": exame.id
+    })
+
+        if exame.tipo == "radiologia":
+            exames_por_paciente[paciente_id]["radiologia"].append({
+        "nome": exame.nome,
+        "id": exame.id
+    })
+
         exames_por_paciente[paciente_id]["ids"].append(exame.id)
 
     exames_prontos = list(exames_por_paciente.values())
