@@ -51,6 +51,9 @@ def login_view(request):
                         return redirect('recepcao_dashboard')
                     elif user.perfil == 'laboratorio':
                         return redirect('laboratorio_lista')
+                    elif user.perfil == 'radiologia':
+                        return redirect('radiologia_lista')
+                    
                 else:
                     error = "Usuário ou senha inválidos."
             else:
@@ -87,6 +90,9 @@ def apenas_admin(user):
 
 def apenas_laboratorio(user):
     return user.is_authenticated and user.perfil == 'laboratorio'
+
+def apenas_radiologia(user):
+    return user.is_authenticated and user.perfil == 'radiologia'
 
 # =========================
 # DASHBOARDS

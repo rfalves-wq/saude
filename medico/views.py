@@ -302,6 +302,9 @@ from .models import Exame
 def apenas_laboratorio(user):
     return user.is_authenticated and user.perfil == "laboratorio"
 
+def apenas_radiologia(user):
+    return user.is_authenticated and user.perfil == "radiologia"
+
 @login_required
 @user_passes_test(apenas_laboratorio)
 def laboratorio_lista(request):
@@ -314,6 +317,40 @@ def laboratorio_lista(request):
         "exames": exames
     })
 
+@login_required
+@user_passes_test(apenas_radiologia)
+def radiologia_lista(request):
+
+    exames = Exame.objects.filter(
+        tipo="radiologia",
+        status="solicitado"
+    ).select_related(
+        "atendimento",
+        "atendimento__paciente"
+    )
+
+    return render(request, "medico/radiologia_lista.html", {
+        "exames": exames
+    })
+
+@login_required
+@user_passes_test(apenas_radiologia)
+def inserir_resultado_radiologia(request, pk):
+
+    exame = get_object_or_404(Exame, pk=pk)
+
+    if request.method == "POST":
+        resultado = request.POST.get("resultado")
+
+        exame.resultado = resultado
+        exame.status = "pronto"
+        exame.save()
+
+        return redirect("radiologia_lista")
+
+    return render(request, "medico/inserir_resultado_radiologia.html", {
+        "exame": exame
+    })
 
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone

@@ -1,0 +1,25 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Resultado do exame</h3>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<textarea name="resultado" class="form-control" rows="5"></textarea>
+
+<br>
+
+<button class="btn btn-success">
+Salvar
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

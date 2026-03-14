@@ -10,6 +10,7 @@ class Usuario(AbstractUser):
     ('tecnico', 'Técnico'),
     ('recepcao', 'Recepção'),
     ('laboratorio', 'Laboratório'),
+    ('radiologia', 'Radiologia'),
     ]
     perfil = models.CharField(max_length=20, choices=PERFIL_CHOICES, default='recepcao')
 

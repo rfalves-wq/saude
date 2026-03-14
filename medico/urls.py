@@ -13,5 +13,15 @@ path("laboratorio/<int:pk>/resultado/", views.inserir_resultado, name="inserir_r
     path('exame/<int:exame_id>/visualizar/', views.visualizar_exame, name='visualizar_exame'),
     path('exame/<int:exame_id>/pdf/', views.gerar_pdf_exame, name='gerar_pdf_exame'),
 
-     
+     path(
+    "radiologia/",
+    views.radiologia_lista,
+    name="radiologia_lista"
+),
+
+path(
+    "radiologia/resultado/<int:pk>/",
+    views.inserir_resultado_radiologia,
+    name="inserir_resultado_radiologia"
+),
 ]
